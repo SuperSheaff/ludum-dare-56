@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 using System.Collections.Generic;
 
 public class GameController : MonoBehaviour
@@ -16,9 +17,11 @@ public class GameController : MonoBehaviour
     public GameObject enemyPrefab;
     public GameObject cardPrefab;
 
-
     // Position where cards will be displayed
-    public Transform cardHandPosition;
+    public Transform playCardPosition;
+    public TextMeshPro chooseTargetText; // UI Text that says "Choose target"
+    public List<GameObject> availableTargets; // The list of available targets in the scene
+
 
     // References to spawned ducks and enemy
     public Duck rogueDuck;
