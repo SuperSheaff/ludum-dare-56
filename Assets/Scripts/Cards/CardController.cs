@@ -16,6 +16,8 @@ public class CardController : MonoBehaviour
     public Transform spreadStartPoint;
     public Transform spreadEndPoint;
 
+    private CardDisplay currentCardBeingPlayed; // The card that's currently being played
+
     private void Awake()
     {
         if (instance == null)
@@ -32,11 +34,11 @@ public class CardController : MonoBehaviour
     // Function to initialize the deck with predefined cards
     public void InitializeDeck()
     {
-        deck.Add(new Card("Rogue Slash", CardType.Rogue, 1, 10, 0));
-        deck.Add(new Card("Knight Shield", CardType.Knight, 2, 0, 15));
-        deck.Add(new Card("Wizard Fireball", CardType.Wizard, 3, 20, 0));
-        deck.Add(new Card("Neutral Strike", CardType.Neutral, 1, 5, 0));
-        deck.Add(new Card("Neutral Block", CardType.Neutral, 1, 0, 5));
+        deck.Add(new Card("Rogue Slash", CardType.Rogue, TargetType.Enemy, 1, 10, 0));
+        deck.Add(new Card("Knight Shield", CardType.Knight, TargetType.AllAllies, 2, 0, 15)); // Targets a specific ally, e.g., a Knight
+        deck.Add(new Card("Wizard Fireball", CardType.Wizard, TargetType.Enemy, 3, 20, 0));
+        deck.Add(new Card("Neutral Strike", CardType.Neutral, TargetType.Enemy, 1, 5, 0));
+        deck.Add(new Card("Neutral Block", CardType.Neutral, TargetType.AllAllies, 1, 0, 5));
     }
 
     // Function to shuffle the deck and move the cards to the draw pile
@@ -96,6 +98,7 @@ public class CardController : MonoBehaviour
         StartCoroutine(SetAllCardsTargetPositions());
     }
 
+    // Move cards to their correct positions in the hand
     private IEnumerator SetAllCardsTargetPositions()
     {
         Vector3 startPoint = spreadStartPoint.position;

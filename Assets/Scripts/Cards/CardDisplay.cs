@@ -11,6 +11,9 @@ public class CardDisplay : MonoBehaviour
     public float hoverHeight = 1.0f; // How much the card should move up when hovered
     public float hoverZOffset = -1.0f; // How much the card should come forward on Z when hovered
 
+    // Add a reference to the card's logical data
+    public Card cardData { get; private set; } // This is the missing 'cardData'
+
     private Vector3 targetPosition;  // The final position set by the controller
     private Vector3 hoverOffset = Vector3.zero;  // Offset added when hovering
     private bool isHovered = false;  // Whether the card is hovered
@@ -27,6 +30,8 @@ public class CardDisplay : MonoBehaviour
     // Function to set card display based on the logical Card data
     public void SetCardData(Card cardData)
     {
+        this.cardData = cardData; // Set the card's data
+
         cardNameText.text = cardData.cardName;
         manaCostText.text = cardData.manaCost.ToString();
 

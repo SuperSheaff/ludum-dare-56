@@ -134,12 +134,12 @@ GameObject:
   - component: {fileID: 183597776}
   - component: {fileID: 183597775}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: ChooseTargetText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &183597775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -863,8 +863,7 @@ MonoBehaviour:
   duckPrefab: {fileID: 3767171708616039059, guid: d948f9df5dff8224d85f95b4419eccc8, type: 3}
   enemyPrefab: {fileID: 8560588940670606955, guid: 3ac918aa00afc984cb4683654cbad12c, type: 3}
   cardPrefab: {fileID: 8816010176994768046, guid: 15b77cffcd941da458be776591d733d3, type: 3}
-  playCardPosition: {fileID: 215881779}
-  chooseTargetText: {fileID: 0}
+  choosTargetText: {fileID: 183597775}
   availableTargets: []
   rogueDuck: {fileID: 0}
   knightDuck: {fileID: 0}
@@ -879,6 +878,10 @@ MonoBehaviour:
   cardController: {fileID: 0}
   cardSpacing: 4.8
   cardYOffset: -12.8
+  enemyCharacters: []
+  allyCharacters: []
+  playCardPosition: {fileID: 215881779}
+  chooseTargetText: {fileID: 183597774}
 --- !u!1 &1198604450
 GameObject:
   m_ObjectHideFlags: 3

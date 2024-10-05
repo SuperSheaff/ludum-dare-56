@@ -18,8 +18,6 @@ public class GameController : MonoBehaviour
     public GameObject cardPrefab;
 
     // Position where cards will be displayed
-    public Transform playCardPosition;
-    public TextMeshPro chooseTargetText; // UI Text that says "Choose target"
     public List<GameObject> availableTargets; // The list of available targets in the scene
 
 
@@ -47,7 +45,13 @@ public class GameController : MonoBehaviour
     public float cardSpacing = 2.0f; // Adjust this for more or less spread
     public float cardYOffset = -3.0f; // Adjust this to move the cards lower on the screen
 
-    private CardDisplay currentCardBeingPlayed; // The card that's currently being played
+    public List<Character> enemyCharacters; // List of all enemy characters
+    public List<Character> allyCharacters;  // List of all ally characters
+    public Transform playCardPosition;      // Position where cards move to when played
+    public GameObject chooseTargetText;     // Text for "Choose Target"
+
+    private Card currentCard;               // The card currently being played
+    private CardDisplay currentCardDisplay; // The CardDisplay of the current card
 
     private void Awake()
     {
@@ -105,6 +109,8 @@ public class GameController : MonoBehaviour
 
     private void InitializeCharacters()
     {
+        availableTargets = new List<GameObject>(); // Initialize the availableTargets list
+
         // Instantiate the same duck prefab for each type
         rogueDuck = Instantiate(duckPrefab, rogueSpawnPoint.position, Quaternion.identity).GetComponent<Duck>();
         knightDuck = Instantiate(duckPrefab, knightSpawnPoint.position, Quaternion.identity).GetComponent<Duck>();
@@ -113,17 +119,21 @@ public class GameController : MonoBehaviour
         enemy = Instantiate(enemyPrefab, enemySpawnPoint.position, Quaternion.identity).GetComponent<Enemy>();
 
         // Initialize ducks with health, attack values, and types
-        rogueDuck.InitializeCharacter("Rogue Duck", 100, 10);
+        rogueDuck.InitializeCharacter("Rogue Duck", 100, 10, CharacterType.Rogue);
         rogueDuck.InitializeDuck(DuckType.Rogue);
+        availableTargets.Add(rogueDuck.gameObject); // Add Rogue Duck to available targets
 
-        knightDuck.InitializeCharacter("Knight Duck", 150, 8);
+        knightDuck.InitializeCharacter("Knight Duck", 150, 8, CharacterType.Knight);
         knightDuck.InitializeDuck(DuckType.Knight);
+        availableTargets.Add(knightDuck.gameObject); // Add Knight Duck to available targets
 
-        wizardDuck.InitializeCharacter("Wizard Duck", 80, 12);
+        wizardDuck.InitializeCharacter("Wizard Duck", 80, 12, CharacterType.Wizard);
         wizardDuck.InitializeDuck(DuckType.Wizard);
+        availableTargets.Add(wizardDuck.gameObject); // Add Wizard Duck to available targets
 
         // Initialize enemy with health and attack values
-        enemy.InitializeCharacter("Enemy", 200, 15);
+        enemy.InitializeCharacter("Enemy", 200, 15, CharacterType.Enemy);
+        availableTargets.Add(enemy.gameObject); // Add Enemy to available targets
     }
 
     // Function to end the player's turn (called by the End Turn button)
@@ -138,40 +148,140 @@ public class GameController : MonoBehaviour
         stateMachine.ChangeState(playerTurnState);
     }
 
-        public void OnCardPlayed(CardDisplay card)
+    // Method to play a card (triggered when clicking on a card)
+    public void OnCardPlayed(CardDisplay cardDisplay)
     {
-        // Set the current card being played
-        currentCardBeingPlayed = card;
+        currentCard         = cardDisplay.cardData;     // Store the logical card data
+        currentCardDisplay  = cardDisplay;              // Store the visual card display
 
-        // Show the "Choose target" text
-        chooseTargetText.gameObject.SetActive(true);
+        // Move the card to the "play card" position
+        cardDisplay.SetTargetPosition(playCardPosition.position);
 
-        // Show UI markers on all available targets
-        foreach (var target in availableTargets)
+        // Show "Choose Target" text
+        chooseTargetText.SetActive(true);
+
+        // Show markers on valid targets based on the card's target type
+        ShowMarkersForValidTargets();
+    }
+
+    // Show markers on valid targets
+    private void ShowMarkersForValidTargets()
+    {
+        List<GameObject> validTargets = new List<GameObject>();
+
+        switch (currentCard.targetType)
         {
-            target.GetComponent<TargetMarker>().ShowMarker();
+            case TargetType.AllAllies:
+                foreach (GameObject target in availableTargets)
+                {
+                    Character targetChar = target.GetComponent<Character>();
+                    if (targetChar.IsAlly())
+                    {
+                        validTargets.Add(target);
+                    }
+                }
+                break;
+
+            case TargetType.Knight:
+                foreach (GameObject target in availableTargets)
+                {
+                    Character targetChar = target.GetComponent<Character>();
+                    if (targetChar.characterType == CharacterType.Knight) // Filter specific class
+                    {
+                        validTargets.Add(target);
+                    }
+                }
+                break;
+
+            case TargetType.Wizard:
+                foreach (GameObject target in availableTargets)
+                {
+                    Character targetChar = target.GetComponent<Character>();
+                    if (targetChar.characterType == CharacterType.Wizard) // Filter specific class
+                    {
+                        validTargets.Add(target);
+                    }
+                }
+                break;
+
+            case TargetType.Rogue:
+                foreach (GameObject target in availableTargets)
+                {
+                    Character targetChar = target.GetComponent<Character>();
+                    if (targetChar.characterType == CharacterType.Rogue) // Filter specific class
+                    {
+                        validTargets.Add(target);
+                    }
+                }
+                break;
+
+            case TargetType.Enemy:
+                foreach (GameObject target in availableTargets)
+                {
+                    Character targetChar = target.GetComponent<Character>();
+                    if (targetChar.IsEnemy())
+                    {
+                        validTargets.Add(target);
+                    }
+                }
+                break;
+
+            case TargetType.Any:
+                validTargets.AddRange(availableTargets);  // All targets can be selected
+                break;
+        }
+
+        foreach (var target in validTargets)
+        {
+            target.GetComponent<Character>().ShowMarker();  // Show marker on valid targets
         }
     }
 
-    // Called when a target is clicked
+
+    // Handle when a target is chosen
     public void OnTargetChosen(GameObject target)
     {
-        if (currentCardBeingPlayed != null)
+        Character targetCharacter = target.GetComponent<Character>();
+
+        if (targetCharacter != null)
         {
-            // Apply card effect to the target (for now, just log it)
-            Debug.Log($"{currentCardBeingPlayed.cardNameText.text} played on {target.name}!");
+            ApplyCardEffect(targetCharacter); // Apply card effects
 
-            // Hide the "Choose target" text
+            // Hide all markers after selection
+            HideAllMarkers();
+
+            // Hide "Choose Target" text
             chooseTargetText.gameObject.SetActive(false);
-
-            // Hide UI markers on all available targets
-            foreach (var availableTarget in availableTargets)
-            {
-                availableTarget.GetComponent<TargetMarker>().HideMarker();
-            }
-
-            // End card play sequence
-            currentCardBeingPlayed = null;
         }
+    }
+
+    // Hide markers on all characters
+    private void HideAllMarkers()
+    {
+        foreach (Character enemy in enemyCharacters)
+        {
+            enemy.HideMarker();
+        }
+
+        foreach (Character ally in allyCharacters)
+        {
+            ally.HideMarker();
+        }
+    }
+
+    // Apply the card's effect to the target
+    private void ApplyCardEffect(Character target)
+    {
+        // Example effect: If the card is an attack card, damage the target
+        if (currentCard.attackPower > 0)
+        {
+            target.TakeDamage(currentCard.attackPower);
+        }
+        else if (currentCard.blockPower > 0)
+        {
+            target.GainBlock(currentCard.blockPower);
+        }
+
+        // After applying the card, you may want to discard or remove the card from hand, etc.
     }
 }
