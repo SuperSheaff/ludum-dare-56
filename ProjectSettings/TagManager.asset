@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - CardController
   layers:
   - Default
   - TransparentFX
@@ -40,4 +41,16 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Environment
+    uniqueID: 3404826283
+    locked: 0
+  - name: Enemy
+    uniqueID: 2459101295
+    locked: 0
+  - name: Duck
+    uniqueID: 2322383467
+    locked: 0
+  - name: UI
+    uniqueID: 1321262027
     locked: 0
