@@ -80,7 +80,7 @@ public class CardDisplay : MonoBehaviour
                 cardSpriteRenderer.sprite = neutralAttackCardSprite;
                 break;
             case "Neutral Block":
-                cardSpriteRenderer.sprite = neutralAttackCardSprite;
+                cardSpriteRenderer.sprite = neutralBlockCardSprite;
                 break;
         }
     }
