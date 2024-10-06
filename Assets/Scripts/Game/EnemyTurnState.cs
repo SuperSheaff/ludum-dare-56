@@ -7,6 +7,16 @@ public class EnemyTurnState : GameState
     public override void Enter()
     {
         Debug.Log("Enemy's turn has started.");
+
+        // Tick
+        foreach (Character character in gameController.allCharacters)
+        {
+            if (character.IsEnemy())
+            {
+                character.StartTurn();
+            }
+        }
+
         // Enemy attacks a random duck here
         AttackRandomDuck();
     }
@@ -29,7 +39,7 @@ public class EnemyTurnState : GameState
     }
 
     public override void Exit()
-    {
+    {        
         Debug.Log("Enemy's turn has ended.");
     }
 }
