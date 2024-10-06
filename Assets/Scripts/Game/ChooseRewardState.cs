@@ -20,15 +20,16 @@ public class ChooseRewardState : GameState
             }
         }
 
+        gameController.endTurnButton.SetActive(false);
+        gameController.unselectButton.SetActive(false);
+
+        // Move ducks to the next dungeon tile
+        CardController.instance.ClearAllCards();
+
         // Move ducks to the next dungeon tile
         gameController.MoveDucksToNextRoom();
 
-        // Move the camera to the center of the next tile
-        CameraController.instance.MoveCamera(new Vector3(gameController.nextRoomX, 0, -10), () =>
-        {
-            // Camera movement is complete, now generate the reward cards
-            gameController.GenerateRewards();
-        });
+        CameraController.instance.MoveCameraToNextTile(gameController.GenerateNextRoomLocation());
     }
 
     public override void Update()

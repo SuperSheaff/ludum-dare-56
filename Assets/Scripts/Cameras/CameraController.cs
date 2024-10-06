@@ -1,46 +1,59 @@
 using UnityEngine;
-using System.Collections; 
-using System.Collections.Generic;
+using System.Collections;
 
 public class CameraController : MonoBehaviour
 {
     public static CameraController instance;
 
-    public Transform cameraTransform;  // Reference to the camera's transform
-    public float moveSpeed = 100f;       // Speed at which the camera moves
-
+    public float cameraMoveSpeed = 2f; // Adjust the speed at which the camera moves
+    private Camera mainCamera;
+    
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);  // Persist between scenes
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            Destroy(gameObject);  // Ensure only one instance exists
+            Destroy(gameObject);
         }
-
-        cameraTransform = Camera.main.transform;  // Set to the main camera
     }
 
-    // Move the camera smoothly to a target position over time
-    public void MoveCamera(Vector3 targetPosition, System.Action onComplete = null)
+    private void Start()
     {
-        StartCoroutine(MoveCameraCoroutine(targetPosition, onComplete));
+        mainCamera = Camera.main;
     }
 
-    private IEnumerator MoveCameraCoroutine(Vector3 targetPosition, System.Action onComplete)
+    // Function to move the camera to the next tile
+    public void MoveCameraToNextTile(Vector3 targetPosition)
     {
-        while (Vector3.Distance(cameraTransform.position, targetPosition) > 0.1f)
+        StartCoroutine(SmoothMoveCamera(targetPosition));
+    }
+
+    private IEnumerator SmoothMoveCamera(Vector3 targetPosition)
+    {
+        // Cache the initial position of the camera
+        Vector3 initialPosition = transform.position;
+        
+        float elapsedTime = 0;
+        float journeyTime = Vector3.Distance(initialPosition, targetPosition) / cameraMoveSpeed;
+
+        while (elapsedTime < journeyTime)
         {
-            cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetPosition, moveSpeed * Time.deltaTime);
+            elapsedTime += Time.deltaTime;
+            
+            // Calculate the t parameter for SmoothStep
+            float t = Mathf.Clamp01(elapsedTime / journeyTime);
+
+            // Use SmoothStep for ease-in-out effect
+            transform.position = Vector3.Lerp(initialPosition, targetPosition, Mathf.SmoothStep(0f, 1f, t));
+            
             yield return null;
         }
 
-        cameraTransform.position = targetPosition;  // Snap to the exact final position
-
-        // Invoke the callback once the camera reaches the target
-        onComplete?.Invoke();
+        // Ensure the final position is exactly the target
+        transform.position = targetPosition;
     }
 }

@@ -334,4 +334,21 @@ public class CardController : MonoBehaviour
         }
     }
 
+    // Function to clear all cards from draw pile, discard pile, and hand, and remove all card displays
+    public void ClearAllCards()
+    {
+        // Clear all displays of cards in hand
+        foreach (CardDisplay cardDisplay in hand)
+        {
+            Destroy(cardDisplay.gameObject); // Destroy the visual representation in the hand
+        }
+
+        // Clear the hand, draw pile, and discard pile
+        hand.Clear();
+        drawPile.Clear();
+        discardPile.Clear();
+
+        Debug.Log("All cards, including displays, have been cleared.");
+    }
+
 }

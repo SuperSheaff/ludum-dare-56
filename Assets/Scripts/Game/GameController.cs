@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 
 public class GameController : MonoBehaviour
@@ -63,13 +64,13 @@ public class GameController : MonoBehaviour
     public int currentMana      = 5;    // Example mana value, this can be dynamic
     public TextMeshPro manaText;        // Reference to the TextMeshPro component for displaying health
 
-    public Transform tileParent; // Parent for background tiles
+    public GameObject TilesParent; // Parent for background tiles
     public GameObject dungeonTilePrefab;
     public GameObject wallTilePrefab;
 
     private List<GameObject> backgroundTiles = new List<GameObject>();
 
-    public float backgroundWidth = 20f;  // Width of each background tile
+    public float backgroundWidth = 38.4f;  // Width of each background tile
     private int currentRoomIndex = 0;    // Keep track of which room the player is currently in
 
 
@@ -91,6 +92,7 @@ public class GameController : MonoBehaviour
     {
         InitializeCharacters();
         InitializeStateMachine();
+        GenerateBackgroundTiles();
 
         // Initialize the deck in CardController
         CardController.instance.InitializeDeck();
@@ -135,9 +137,9 @@ public class GameController : MonoBehaviour
         allCharacters = new List<Character>(); // Initialize the allCharacters list
 
         // Instantiate the same duck prefab for each type
-        rogueDuck = Instantiate(duckPrefab, rogueSpawnPoint.position, Quaternion.identity).GetComponent<Duck>();
-        knightDuck = Instantiate(duckPrefab, knightSpawnPoint.position, Quaternion.identity).GetComponent<Duck>();
-        wizardDuck = Instantiate(duckPrefab, wizardSpawnPoint.position, Quaternion.identity).GetComponent<Duck>();
+        rogueDuck = Instantiate(duckPrefab, rogueSpawnPoint.position, Quaternion.identity, ducksParent.transform).GetComponent<Duck>();
+        knightDuck = Instantiate(duckPrefab, knightSpawnPoint.position, Quaternion.identity, ducksParent.transform).GetComponent<Duck>();
+        wizardDuck = Instantiate(duckPrefab, wizardSpawnPoint.position, Quaternion.identity, ducksParent.transform).GetComponent<Duck>();
 
         enemy = Instantiate(enemyPrefab, enemySpawnPoint.position, Quaternion.identity).GetComponent<Enemy>();
 
@@ -158,7 +160,7 @@ public class GameController : MonoBehaviour
         DuckParty.Add(wizardDuck); // Add Wizard Duck to available targets
 
         // Initialize enemy with health and attack values
-        enemy.InitializeCharacter("Enemy", 10, 15, CharacterType.Enemy);
+        enemy.InitializeCharacter("Enemy", 1, 15, CharacterType.Enemy);
         allCharacters.Add(enemy); // Add Enemy to available targets
         Enemies.Add(enemy); // Add Enemy to available targets
     }
@@ -489,28 +491,49 @@ public class GameController : MonoBehaviour
 
     public void GenerateBackgroundTiles()
     {
+        // Create a parent object to hold the tiles (if it doesn't exist)
+        if (TilesParent == null)
+        {
+            TilesParent = new GameObject("TilesParent"); // Create a parent object for background tiles
+        }
+
         // Tile 1 - Dungeon
-        GameObject tile1 = Instantiate(dungeonTilePrefab, new Vector3(0, 0, 0), Quaternion.identity, tileParent);
+        GameObject tile1 = Instantiate(dungeonTilePrefab, new Vector3(0, 0, 0), Quaternion.identity, TilesParent.transform);
         backgroundTiles.Add(tile1);
-        
+
         // Tile 2 - Wall
-        GameObject tile2 = Instantiate(wallTilePrefab, new Vector3(backgroundWidth, 0, 0), Quaternion.identity, tileParent);
+        GameObject tile2 = Instantiate(wallTilePrefab, new Vector3(backgroundWidth, 0, 0), Quaternion.identity, TilesParent.transform);
         backgroundTiles.Add(tile2);
-        
-        // Tile 3 - Dungeon
-        GameObject tile3 = Instantiate(dungeonTilePrefab, new Vector3(2 * backgroundWidth, 0, 0), Quaternion.identity, tileParent);
-        backgroundTiles.Add(tile3);
     }
 
     public void MoveDucksToNextRoom()
     {
-        // Parent the ducks to a GameObject and move the parent
-        ducksParent.transform.position = Vector3.MoveTowards(ducksParent.transform.position, new Vector3(2 * backgroundWidth, 0, 0), duckMoveSpeed * Time.deltaTime);
+        // Calculate the target position based on the current position of ducksParent
+        Vector3 targetPosition = ducksParent.transform.position + new Vector3(2 * backgroundWidth, 0, 0); 
+
+        // Move the ducks' parent GameObject
+        StartCoroutine(MoveDucksCoroutine(targetPosition));
+    }
+
+    private IEnumerator MoveDucksCoroutine(Vector3 targetPosition)
+    {
+        float duration = 1.5f; // Adjust the time it takes to move
+        float elapsedTime = 0f;
+        Vector3 startingPosition = ducksParent.transform.position;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            ducksParent.transform.position = Vector3.Lerp(startingPosition, targetPosition, elapsedTime / duration);
+            yield return null;
+        }
+
+        ducksParent.transform.position = targetPosition; // Ensure it reaches the final position
     }
 
     public void GenerateRewards()
     {
-
+        Debug.Log("GenerateRewards");
     }
 
     public void GetRandomCardFromLibrary()
@@ -518,10 +541,17 @@ public class GameController : MonoBehaviour
 
     }
 
-    // Calculate the X position of the next room
-    public float nextRoomX
+    // Function to calculate and return the next room's location
+    public Vector3 GenerateNextRoomLocation()
     {
-        get { return currentRoomIndex * backgroundWidth; }
+        // Increment the room index to move to the next room
+        currentRoomIndex++;
+
+        // Calculate the x-position of the next room based on the index and background width
+        float nextRoomX = currentRoomIndex * backgroundWidth;
+
+        // Return the new room's location (on the x-axis, keeping y and z consistent)
+        return new Vector3(nextRoomX, 0, -500f); // Keeping y = 0, z = -10 (default camera z)
     }
 
     // Function to move to the next room
