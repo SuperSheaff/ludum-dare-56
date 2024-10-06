@@ -266,8 +266,10 @@ GameObject:
   m_Component:
   - component: {fileID: 7376009576043088279}
   - component: {fileID: 1319353049468958187}
+  - component: {fileID: 7946722918755645487}
+  - component: {fileID: 7212902083114448906}
   m_Layer: 0
-  m_Name: AvailableMarker
+  m_Name: Marker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -282,7 +284,7 @@ Transform:
   m_GameObject: {fileID: 2682255878733445371}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.721, z: 0}
+  m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -329,7 +331,7 @@ SpriteRenderer:
   m_SortingLayerID: -1972583829
   m_SortingLayer: 3
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: cf28724678d5b8847801e7b097fe5976, type: 3}
+  m_Sprite: {fileID: 2001334618, guid: 3b56f7f313605a0498adb1c7a296a336, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -340,6 +342,39 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!95 &7946722918755645487
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2682255878733445371}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e98e8b7ae2762464f9dd40b2bc619592, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7212902083114448906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2682255878733445371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfc77c1a6ed6e904ca1ed1c3a2a445be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3767171708616039059
 GameObject:
   m_ObjectHideFlags: 0
@@ -447,6 +482,8 @@ MonoBehaviour:
   attackDamage: 0
   block: 0
   healthText: {fileID: 475340161677900832}
+  blockText: {fileID: 243367234957803903}
+  blockMarker: {fileID: 2366490874128967588}
   marker: {fileID: 2682255878733445371}
   defaultMarkerColor: {r: 1, g: 1, b: 1, a: 1}
   hoverMarkerColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

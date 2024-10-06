@@ -57,7 +57,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -7461420324007273663, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
+  - {fileID: -154946935227663759, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -102,7 +102,7 @@ MonoBehaviour:
   m_text: 1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
-  m_sharedMaterial: {fileID: -7461420324007273663, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
+  m_sharedMaterial: {fileID: -154946935227663759, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -228,7 +228,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -7461420324007273663, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
+  - {fileID: -154946935227663759, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -273,7 +273,7 @@ MonoBehaviour:
   m_text: 1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
-  m_sharedMaterial: {fileID: -7461420324007273663, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
+  m_sharedMaterial: {fileID: -154946935227663759, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -453,9 +453,9 @@ MonoBehaviour:
   isHovered: 0
   isBeingPlayed: 0
   hoverEnabled: 1
-  smokebombCardSprite: {fileID: 21300000, guid: f2b2b6590663bc94790d7d575d01ffde, type: 3}
-  poisonCardSprite: {fileID: 21300000, guid: 96578258c35571f489bc9014f3fea497, type: 3}
-  healCardSprite: {fileID: 21300000, guid: a9f24df7225b0a34b8e24154574e55a8, type: 3}
+  smokebombCardSprite: {fileID: 21300000, guid: 1b2697c7d8e12fb43ae81305c28f880d, type: 3}
+  poisonCardSprite: {fileID: 21300000, guid: 0ad6801188d6c634d9fc34462bb98303, type: 3}
+  healCardSprite: {fileID: 21300000, guid: 144eb506a1a79d54b8ab6fd6f06f7727, type: 3}
   fireballCardSprite: {fileID: 21300000, guid: 68663d9290a6b8046b4a6b1f6d8755e5, type: 3}
   tauntCardSprite: {fileID: 21300000, guid: f2b2b6590663bc94790d7d575d01ffde, type: 3}
   recklessCardSprite: {fileID: 21300000, guid: 96578258c35571f489bc9014f3fea497, type: 3}

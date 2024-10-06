@@ -548,7 +548,7 @@ Transform:
   m_GameObject: {fileID: 605868197}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -13.6, y: -0.3, z: 0}
+  m_LocalPosition: {x: -14.4, y: -0.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -738,7 +738,7 @@ Transform:
   m_GameObject: {fileID: 653794160}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.8, y: -0.3, z: 0}
+  m_LocalPosition: {x: -8, y: -0.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -769,7 +769,7 @@ Transform:
   m_GameObject: {fileID: 774635146}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -11.6, y: 0.2, z: 0}
+  m_LocalPosition: {x: -11.2, y: 0.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1027,9 +1027,9 @@ MonoBehaviour:
   knightDuck: {fileID: 0}
   wizardDuck: {fileID: 0}
   enemy: {fileID: 0}
-  rogueSpawnPoint: {fileID: 605868198}
+  rogueSpawnPoint: {fileID: 774635147}
   knightSpawnPoint: {fileID: 653794161}
-  wizardSpawnPoint: {fileID: 774635147}
+  wizardSpawnPoint: {fileID: 605868198}
   enemySpawnPoint: {fileID: 993137856}
   endTurnButton: {fileID: 1866849625}
   unselectButton: {fileID: 646418232}
