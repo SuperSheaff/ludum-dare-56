@@ -38,14 +38,16 @@ public class CardController : MonoBehaviour
     // Function to initialize the deck with predefined cards
     public void InitializeDeck()
     {
-        deck.Add(new Card("Smoke Bomb",         CardType.Rogue, TargetType.AllAllies,   1, 10, 0));
-        deck.Add(new Card("Poison",             CardType.Rogue, TargetType.Enemy,       2, 0, 15)); // Targets a specific ally, e.g., a Knight
-        deck.Add(new Card("Heal",               CardType.Wizard, TargetType.AllAllies,  1, 5, 0));
-        deck.Add(new Card("Fireball",           CardType.Knight, TargetType.Enemy,      1, 5, 0));
-        deck.Add(new Card("Taunt",              CardType.Knight, TargetType.Knight,     1, 5, 0));
-        deck.Add(new Card("Reckless",           CardType.Neutral, TargetType.Enemy,     1, 5, 0));
-        deck.Add(new Card("Neutral Attack",     CardType.Neutral, TargetType.AllAllies, 1, 0, 5));
-        deck.Add(new Card("Neutral Block",      CardType.Neutral, TargetType.AllAllies, 1, 0, 5));
+        deck.Add(new Card("Smoke Bomb",         CardType.Rogue,     TargetType.AllAllies,       1, 1, 0));
+        deck.Add(new Card("Poison",             CardType.Rogue,     TargetType.Enemy,           2, 2, 3));
+        deck.Add(new Card("Heal",               CardType.Wizard,    TargetType.AllAllies,       1, 4, 0));
+        deck.Add(new Card("Fireball",           CardType.Wizard,    TargetType.Enemy,           1, 3, 0));
+        deck.Add(new Card("Taunt",              CardType.Knight,    TargetType.Knight,          1, 1, 0));
+        deck.Add(new Card("Reckless",           CardType.Knight,    TargetType.Enemy,           1, 5, 2));
+        deck.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 1, 0));
+        deck.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 1, 0));
+        deck.Add(new Card("Neutral Block",      CardType.Neutral,   TargetType.AllAllies,       1, 5, 0));
+        deck.Add(new Card("Neutral Block",      CardType.Neutral,   TargetType.AllAllies,       1, 5, 0));
     }
 
     // Function to shuffle the deck and move the cards to the draw pile

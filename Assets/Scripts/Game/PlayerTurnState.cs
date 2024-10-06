@@ -13,6 +13,17 @@ public class PlayerTurnState : GameState
         CardController.instance.CheckDrawPile(); 
         CardController.instance.DrawHand(); 
         gameController.endTurnButton.SetActive(true); // Show the End Turn button
+
+        // Tick
+        foreach (Character character in gameController.allCharacters)
+        {
+            if (character.IsAlly())
+            {
+                character.StartTurn();
+            }
+        }
+
+        // Set enemy intent here
     }
 
     public override void Update()

@@ -17,6 +17,9 @@ public class Character : MonoBehaviour
     public int attackDamage;
     public int block; // Amount of block (temporary defense)
 
+    public float evadeChance = 0f; // Evade chance (0.0 to 1.0)
+    private int evadeChanceTurnsRemaining;
+
     public TextMeshPro healthText; // Reference to the TextMeshPro component for displaying health
     public TextMeshPro blockText; // Reference to the TextMeshPro component for displaying health
     public GameObject blockMarker; // Reference to the block marker object (blockText)
@@ -28,6 +31,10 @@ public class Character : MonoBehaviour
     public CharacterType characterType; // Add this to define the class of the character
 
     public bool markerIsActive;
+
+    // Poison-related properties
+    private int poisonDamage;
+    private int poisonTurnsRemaining;
 
     private void Start()
     {
@@ -44,11 +51,11 @@ public class Character : MonoBehaviour
     // Initialize character stats and health text
     public void InitializeCharacter(string name, int health, int attack, CharacterType type)
     {
-        characterName = name;
-        maxHealth = health;
-        currentHealth = health;
-        attackDamage = attack;
-        characterType = type;
+        characterName   = name;
+        maxHealth       = health;
+        currentHealth   = health;
+        attackDamage    = attack;
+        characterType   = type;
 
         UpdateStatText();
     }
@@ -63,17 +70,36 @@ public class Character : MonoBehaviour
         return characterType == CharacterType.Enemy;
     }
 
-
     // Method to gain block
     public void GainBlock(int amount)
     {
         block += amount;
         Debug.Log($"{characterName} gained {amount} block. Current block: {block}");
+
+        UpdateStatText(); // Update UI after healing
     }
 
-    // Method to take damage, factoring in block
+    // Method to heal the character
+    public void Heal(int amount)
+    {
+        currentHealth += amount;
+        currentHealth = Mathf.Min(currentHealth, maxHealth); // Ensure health doesn't exceed maxHealth
+
+        Debug.Log($"{characterName} healed for {amount}. Current health: {currentHealth}");
+
+        UpdateStatText(); // Update UI after healing
+    }
+
+    // Update this method to consider evade
     public virtual void TakeDamage(int damage)
     {
+        // Check for evade
+        if (TryEvade())
+        {
+            Debug.Log($"{characterName} evaded the attack!");
+            return; // No damage taken
+        }
+
         if (block > 0)
         {
             // If the character has block, reduce damage from block first
@@ -95,6 +121,65 @@ public class Character : MonoBehaviour
         {
             Die();
         }
+    }
+
+    // Poison-related methods
+    public void ApplyPoison(int damagePerTurn, int turns)
+    {
+        poisonDamage = damagePerTurn;
+        poisonTurnsRemaining += turns;
+        Debug.Log($"{characterName} has been poisoned! Takes {damagePerTurn} damage for {turns} turns.");
+    }
+
+    // Method to check poison damage at the start of each turn
+    public void CheckPoisonDamage()
+    {
+        if (poisonTurnsRemaining > 0)
+        {
+            TakeDamage(poisonDamage);
+            poisonTurnsRemaining--;
+            Debug.Log($"{characterName} took {poisonDamage} poison damage. {poisonTurnsRemaining} turns remaining.");
+        }
+    }
+
+
+    // Method to apply evade chance for a turn~
+    public void ApplyEvadeChance(float chance, int turns)
+    {
+        evadeChance = chance;
+        evadeChanceTurnsRemaining += turns;
+        Debug.Log($"{characterName} gained {evadeChance * 100}% evade chance!");
+    }
+
+    public void CheckEvade()
+    {
+        if (evadeChanceTurnsRemaining > 0)
+        {
+            evadeChanceTurnsRemaining--;
+        }
+        else 
+        {
+            ResetEvadeChance();
+        }
+    }
+
+    // Method to determine if an attack is evaded
+    public bool TryEvade()
+    {
+        if (evadeChanceTurnsRemaining > 0)
+        {
+            return Random.value < evadeChance; // Returns true if evaded
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    // Function to reset evade chance (e.g., after a turn)
+    public void ResetEvadeChance()
+    {
+        evadeChance = 0f;
     }
 
     // Method to perform an attack
@@ -176,5 +261,15 @@ public class Character : MonoBehaviour
         {
             GameController.instance.OnTargetChosen(this.gameObject); // Notify GameController that this target was chosen
         }
+    }
+
+    // Call this at the start of each turn for all characters
+    public void StartTurn()
+    {
+        // Apply poison damage at the start of the turn if the character is poisoned
+        CheckPoisonDamage();
+        CheckEvade();
+        
+        // Other turn-related logic...
     }
 }

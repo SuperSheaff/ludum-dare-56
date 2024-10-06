@@ -18,7 +18,7 @@ public class GameController : MonoBehaviour
     public GameObject cardPrefab;
 
     // Position where cards will be displayed
-    public List<GameObject> availableTargets; // The list of available targets in the scene
+    public List<Character> allCharacters; // The list of available targets in the scene
 
 
     // References to spawned ducks and enemy
@@ -116,7 +116,7 @@ public class GameController : MonoBehaviour
 
     private void InitializeCharacters()
     {
-        availableTargets = new List<GameObject>(); // Initialize the availableTargets list
+        allCharacters = new List<Character>(); // Initialize the allCharacters list
 
         // Instantiate the same duck prefab for each type
         rogueDuck = Instantiate(duckPrefab, rogueSpawnPoint.position, Quaternion.identity).GetComponent<Duck>();
@@ -128,19 +128,19 @@ public class GameController : MonoBehaviour
         // Initialize ducks with health, attack values, and types
         rogueDuck.InitializeCharacter("Rogue Duck", 10, 10, CharacterType.Rogue);
         rogueDuck.InitializeDuck(DuckType.Rogue);
-        availableTargets.Add(rogueDuck.gameObject); // Add Rogue Duck to available targets
+        allCharacters.Add(rogueDuck); // Add Rogue Duck to available targets
 
         knightDuck.InitializeCharacter("Knight Duck", 15, 8, CharacterType.Knight);
         knightDuck.InitializeDuck(DuckType.Knight);
-        availableTargets.Add(knightDuck.gameObject); // Add Knight Duck to available targets
+        allCharacters.Add(knightDuck); // Add Knight Duck to available targets
 
         wizardDuck.InitializeCharacter("Wizard Duck", 8, 12, CharacterType.Wizard);
         wizardDuck.InitializeDuck(DuckType.Wizard);
-        availableTargets.Add(wizardDuck.gameObject); // Add Wizard Duck to available targets
+        allCharacters.Add(wizardDuck); // Add Wizard Duck to available targets
 
         // Initialize enemy with health and attack values
         enemy.InitializeCharacter("Enemy", 10, 15, CharacterType.Enemy);
-        availableTargets.Add(enemy.gameObject); // Add Enemy to available targets
+        allCharacters.Add(enemy); // Add Enemy to available targets
     }
 
     // Function to end the player's turn (called by the End Turn button)
@@ -194,15 +194,14 @@ public class GameController : MonoBehaviour
     // Show markers on valid targets
     private void ShowMarkersForValidTargets()
     {
-        List<GameObject> validTargets = new List<GameObject>();
+        List<Character> validTargets = new List<Character>();
 
         switch (currentCard.targetType)
         {
             case TargetType.AllAllies:
-                foreach (GameObject target in availableTargets)
+                foreach (Character target in allCharacters)
                 {
-                    Character targetChar = target.GetComponent<Character>();
-                    if (targetChar.IsAlly())
+                    if (target.IsAlly())
                     {
                         validTargets.Add(target);
                     }
@@ -210,10 +209,9 @@ public class GameController : MonoBehaviour
                 break;
 
             case TargetType.Knight:
-                foreach (GameObject target in availableTargets)
+                foreach (Character target in allCharacters)
                 {
-                    Character targetChar = target.GetComponent<Character>();
-                    if (targetChar.characterType == CharacterType.Knight) // Filter specific class
+                    if (target.characterType == CharacterType.Knight) // Filter specific class
                     {
                         validTargets.Add(target);
                     }
@@ -221,10 +219,9 @@ public class GameController : MonoBehaviour
                 break;
 
             case TargetType.Wizard:
-                foreach (GameObject target in availableTargets)
+                foreach (Character target in allCharacters)
                 {
-                    Character targetChar = target.GetComponent<Character>();
-                    if (targetChar.characterType == CharacterType.Wizard) // Filter specific class
+                    if (target.characterType == CharacterType.Wizard) // Filter specific class
                     {
                         validTargets.Add(target);
                     }
@@ -232,10 +229,9 @@ public class GameController : MonoBehaviour
                 break;
 
             case TargetType.Rogue:
-                foreach (GameObject target in availableTargets)
+                foreach (Character target in allCharacters)
                 {
-                    Character targetChar = target.GetComponent<Character>();
-                    if (targetChar.characterType == CharacterType.Rogue) // Filter specific class
+                    if (target.characterType == CharacterType.Rogue) // Filter specific class
                     {
                         validTargets.Add(target);
                     }
@@ -243,10 +239,9 @@ public class GameController : MonoBehaviour
                 break;
 
             case TargetType.Enemy:
-                foreach (GameObject target in availableTargets)
+                foreach (Character target in allCharacters)
                 {
-                    Character targetChar = target.GetComponent<Character>();
-                    if (targetChar.IsEnemy())
+                    if (target.IsEnemy())
                     {
                         validTargets.Add(target);
                     }
@@ -254,7 +249,7 @@ public class GameController : MonoBehaviour
                 break;
 
             case TargetType.Any:
-                validTargets.AddRange(availableTargets);  // All targets can be selected
+                validTargets.AddRange(allCharacters);  // All targets can be selected
                 break;
         }
 
@@ -286,7 +281,7 @@ public class GameController : MonoBehaviour
     // Hide markers on all characters
     private void HideAllMarkers()
     {
-        foreach (GameObject character in availableTargets)
+        foreach (Character character in allCharacters)
         {
             character.GetComponent<Character>().HideMarker();
         }
@@ -305,27 +300,63 @@ public class GameController : MonoBehaviour
         // Change color based on card type
         switch (playedCard.cardName)
         {
+
+            // Apply evade chance to all ally ducks (50% chance to evade for one turn)
             case "Smoke Bomb":
-                target.TakeDamage(playedCard.primaryAmount);
+                foreach (Character character in allCharacters)
+                {
+                    if (character.IsAlly()) // Ensure it's a duck
+                    {
+                        character.ApplyEvadeChance(0.5f, 1); // 50% evade chance for 1 turn
+                    }
+                }
                 break;
+
+
+            // Apply poison for primaryAmount damage over secondaryAmount turns
             case "Poison":
-                target.TakeDamage(playedCard.primaryAmount);
+                target.ApplyPoison(playedCard.primaryAmount, playedCard.secondaryAmount); 
                 break;
+
+            // Apply heal for primaryAmount to target
             case "Heal":
-                target.TakeDamage(playedCard.primaryAmount);
+                target.Heal(playedCard.primaryAmount);
                 break;
+
+            // Apply damage for primaryAmount to target
             case "Fireball":
                 target.TakeDamage(playedCard.primaryAmount);
                 break;
+
+            // Change intent to knight duck
             case "Taunt":
                 target.TakeDamage(playedCard.primaryAmount);
                 break;
+
+            // Deal primary damage to the target and Knight Duck takes secondary damage
             case "Reckless":
                 target.TakeDamage(playedCard.primaryAmount);
+
+                // Find the knight duck and deal secondary damage to it
+                Character knightDuck = GameController.instance.knightDuck;
+
+                if (knightDuck != null)
+                {
+                    knightDuck.TakeDamage(playedCard.secondaryAmount);
+                    Debug.Log($"Knight Duck takes {playedCard.secondaryAmount} damage from the reckless attack!");
+                }
+                else
+                {
+                    Debug.Log("Knight Duck not found.");
+                }
                 break;
+
+            // Apply damage for primaryAmount to target
             case "Neutral Attack":
                 target.TakeDamage(playedCard.primaryAmount);
                 break;
+
+            // Apply block for primaryAmount to target
             case "Neutral Block":
                 target.GainBlock(playedCard.primaryAmount);
                 break;
