@@ -11,6 +11,9 @@ public class CardDisplay : MonoBehaviour
     public float hoverHeight = 1.0f; // How much the card should move up when hovered
     public float hoverZOffset = -1.0f; // How much the card should come forward on Z when hovered
 
+    private bool isDisabled = false; // To track if the card is disabled
+    public GameObject disabledIcon; // Reference to an icon that appears when the card is disabled
+
     // Add a reference to the card's logical data
     public Card cardData { get; private set; } // This is the missing 'cardData'
 
@@ -54,6 +57,11 @@ public class CardDisplay : MonoBehaviour
 
         manaCostText.text = cardData.manaCost.ToString();
         cardNameText.text = cardData.cardName.ToString();
+
+        if (cardData.isDisabled)
+        {
+            Disable();
+        }
 
         // Change color based on card type
         switch (cardData.cardName)
@@ -122,7 +130,7 @@ public class CardDisplay : MonoBehaviour
     // Handle hover effect
     private void OnMouseEnter()
     {
-        if (!isBeingPlayed  && hoverEnabled) // Disable hover if the card is being played
+        if (!isBeingPlayed  && hoverEnabled && !isDisabled) // Disable hover if the card is being played
         {
             isHovered = true;
             hoverOffset = new Vector3(0, hoverHeight, hoverZOffset);  // Apply hover offset (Y and Z)
@@ -131,7 +139,7 @@ public class CardDisplay : MonoBehaviour
 
     private void OnMouseExit()
     {
-        if (!isBeingPlayed  && hoverEnabled) // Disable hover if the card is being played
+        if (!isBeingPlayed  && hoverEnabled && !isDisabled) // Disable hover if the card is being played
         {
             isHovered = false;
             hoverOffset = Vector3.zero;  // Reset hover offset
@@ -141,13 +149,37 @@ public class CardDisplay : MonoBehaviour
     private void OnMouseDown()
     {
         // When clicked, move the card to the play position and start target selection
-        if (isHovered && !isBeingPlayed  && hoverEnabled)
+        if (isHovered && !isBeingPlayed  && hoverEnabled && !isDisabled)
         {
             isBeingPlayed = true;
             hoverOffset = Vector3.zero;  // Reset hover offset
 
             // Send this card to the CardController
             CardController.instance.OnCardSelected(this);
+        }
+    }
+
+    // Function to disable the card (prevents it from being played)
+    public void Disable()
+    {
+        isDisabled = true;
+        hoverEnabled = false; // Disable hovering
+        cardSpriteRenderer.color = Color.gray; // Set sprite color to gray to visually indicate disabled state
+        if (disabledIcon != null)
+        {
+            disabledIcon.SetActive(true); // Show disabled icon if present
+        }
+    }
+
+    // Function to enable the card (allows it to be played again)
+    public void Enable()
+    {
+        isDisabled = false;
+        hoverEnabled = true; // Enable hovering
+        cardSpriteRenderer.color = Color.white; // Reset sprite color to normal
+        if (disabledIcon != null)
+        {
+            disabledIcon.SetActive(false); // Hide disabled icon if present
         }
     }
 

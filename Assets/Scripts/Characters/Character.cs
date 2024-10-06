@@ -23,14 +23,19 @@ public class Character : MonoBehaviour
     public TextMeshPro healthText; // Reference to the TextMeshPro component for displaying health
     public TextMeshPro blockText; // Reference to the TextMeshPro component for displaying health
     public GameObject blockMarker; // Reference to the block marker object (blockText)
+    public GameObject healthMarker; // Reference to the block marker object (blockText)
     public GameObject marker; // Reference to the marker object
+    public GameObject intentMarker; // Reference to the intent marker object
     private SpriteRenderer markerRenderer; // Reference to the marker's SpriteRenderer to change its color
+
+    public Sprite deathSprite;
 
     public Color defaultMarkerColor = Color.white; // Default marker color
     public Color hoverMarkerColor = Color.yellow; // Marker color when hovered
     public CharacterType characterType; // Add this to define the class of the character
 
     public bool markerIsActive;
+
 
     // Poison-related properties
     private int poisonDamage;
@@ -57,6 +62,7 @@ public class Character : MonoBehaviour
         attackDamage    = attack;
         characterType   = type;
 
+        HideIntentMarker();
         UpdateStatText();
     }
 
@@ -210,10 +216,28 @@ public class Character : MonoBehaviour
     }
 
     // Function when character dies
-    protected virtual void Die()
+    public void Die()
     {
         Debug.Log(characterName + " has died!");
-        // Add death logic (e.g., disable the character, etc.)
+
+        // Hide health and block markers
+        if (healthMarker != null)
+        {
+            healthMarker.SetActive(false);
+        }
+        if (blockMarker != null)
+        {
+            blockMarker.SetActive(false);
+        }
+
+        // Show death sprite
+        if (deathSprite != null)
+        {
+            GetComponent<SpriteRenderer>().sprite = deathSprite;
+        }
+
+        // Notify the GameController to disable cards of this duck's class
+        GameController.instance.OnCharacterDeath(characterType);
     }
 
     // Function to show the marker above the character
@@ -271,5 +295,23 @@ public class Character : MonoBehaviour
         CheckEvade();
         
         // Other turn-related logic...
+    }
+
+    // Function to show the intent marker
+    public void ShowIntentMarker()
+    {
+        if (intentMarker != null)
+        {
+            intentMarker.SetActive(true); // Show the marker
+        }
+    }
+
+    // Function to hide the intent marker
+    public void HideIntentMarker()
+    {
+        if (intentMarker != null)
+        {
+            intentMarker.SetActive(false); // Hide the marker
+        }
     }
 }

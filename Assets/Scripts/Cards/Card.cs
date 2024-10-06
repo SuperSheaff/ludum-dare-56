@@ -22,6 +22,9 @@ public class Card
     public int primaryAmount;       // Generic value (e.g., for attack, heal, etc.)
     public int secondaryAmount;     // Generic value (e.g., for block, buff, etc.)
 
+    // New field to track if the card is disabled
+    public bool isDisabled;
+
     public Card(string name, CardType type, TargetType target, int mana, int primary, int secondary)
     {
         cardName            = name;
@@ -30,5 +33,6 @@ public class Card
         manaCost            = mana;
         primaryAmount       = primary;
         secondaryAmount     = secondary;
+        isDisabled          = false;
     }
 }
