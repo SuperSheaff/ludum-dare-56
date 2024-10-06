@@ -14,12 +14,12 @@ public class CardDisplay : MonoBehaviour
     // Add a reference to the card's logical data
     public Card cardData { get; private set; } // This is the missing 'cardData'
 
-    private Vector3 targetPosition;  // The final position set by the controller
+    public Vector3 targetPosition;  // The final position set by the controller
 
-    private Vector3 hoverOffset = Vector3.zero;  // Offset added when hovering
-    private bool isHovered      = false;  // Whether the card is hovered
-    private bool isBeingPlayed  = false; // Whether the card is in the play position
-    private bool hoverEnabled   = true; // Whether the card is in the play position
+    public Vector3 hoverOffset = Vector3.zero;  // Offset added when hovering
+    public bool isHovered      = false;  // Whether the card is hovered
+    public bool isBeingPlayed  = false; // Whether the card is in the play position
+    public bool hoverEnabled   = true; // Whether the card is in the play position
 
     // Rogue Cards
     public Sprite smokebombCardSprite;
