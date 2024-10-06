@@ -20,6 +20,10 @@ public class Character : MonoBehaviour
     public float evadeChance = 0f; // Evade chance (0.0 to 1.0)
     private int evadeChanceTurnsRemaining;
 
+    // Particle systems for block and health effects
+    public ParticleSystem blockParticle;
+    public ParticleSystem healthParticle;
+
     public TextMeshPro healthText; // Reference to the TextMeshPro component for displaying health
     public TextMeshPro blockText; // Reference to the TextMeshPro component for displaying health
     public GameObject blockMarker; // Reference to the block marker object (blockText)
@@ -106,6 +110,9 @@ public class Character : MonoBehaviour
     // Update this method to consider evade
     public virtual void TakeDamage(int damage)
     {
+        bool blockWasReduced = false;
+        bool healthWasReduced = false;
+
         // Check for evade
         if (TryEvade())
         {
@@ -119,13 +126,30 @@ public class Character : MonoBehaviour
             int remainingDamage = Mathf.Max(damage - block, 0);
             block = Mathf.Max(block - damage, 0);
             damage = remainingDamage;
+
+            blockWasReduced = true;
         }
 
         // Apply any remaining damage to health
-        currentHealth -= damage;
-        currentHealth = Mathf.Max(0, currentHealth); // Ensure health doesn't go below 0
+        if (damage > 0)
+        {
+            currentHealth -= damage;
+            currentHealth = Mathf.Max(0, currentHealth); // Ensure health doesn't go below 0
+            healthWasReduced = true;
+        }
 
         Debug.Log($"{characterName} took {damage} damage. Current health: {currentHealth}");
+
+        // Play particle effects for block and health reduction
+        if (blockWasReduced && blockParticle != null)
+        {
+            blockParticle.Play();
+        }
+
+        if (healthWasReduced && healthParticle != null)
+        {
+            healthParticle.Play();
+        }
 
         // Update the health text
         UpdateStatText();
