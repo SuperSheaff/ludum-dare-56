@@ -53,6 +53,7 @@ public class CardDisplay : MonoBehaviour
         this.cardData = cardData; // Set the card's data
 
         manaCostText.text = cardData.manaCost.ToString();
+        cardNameText.text = cardData.cardName.ToString();
 
         // Change color based on card type
         switch (cardData.cardName)

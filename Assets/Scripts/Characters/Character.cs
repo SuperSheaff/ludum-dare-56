@@ -18,6 +18,8 @@ public class Character : MonoBehaviour
     public int block; // Amount of block (temporary defense)
 
     public TextMeshPro healthText; // Reference to the TextMeshPro component for displaying health
+    public TextMeshPro blockText; // Reference to the TextMeshPro component for displaying health
+    public GameObject blockMarker; // Reference to the block marker object (blockText)
     public GameObject marker; // Reference to the marker object
     private SpriteRenderer markerRenderer; // Reference to the marker's SpriteRenderer to change its color
 
@@ -36,7 +38,7 @@ public class Character : MonoBehaviour
         markerRenderer.color = defaultMarkerColor;
 
         // Update the health text at the start
-        UpdateHealthText();
+        UpdateStatText();
     }
 
     // Initialize character stats and health text
@@ -48,7 +50,7 @@ public class Character : MonoBehaviour
         attackDamage = attack;
         characterType = type;
 
-        UpdateHealthText();
+        UpdateStatText();
     }
 
     public bool IsAlly()
@@ -87,7 +89,7 @@ public class Character : MonoBehaviour
         Debug.Log($"{characterName} took {damage} damage. Current health: {currentHealth}");
 
         // Update the health text
-        UpdateHealthText();
+        UpdateStatText();
 
         if (currentHealth <= 0)
         {
@@ -102,12 +104,23 @@ public class Character : MonoBehaviour
         Debug.Log($"{characterName} attacked {target.characterName} for {attackDamage} damage.");
     }
 
-    // Function to update the health text display
-    public void UpdateHealthText()
+    // Function to update the health and block text display
+    public void UpdateStatText()
     {
         if (healthText != null)
         {
             healthText.text = currentHealth.ToString();
+        }
+
+        // If block is greater than 0, display the block text and marker
+        if (block > 0)
+        {
+            blockText.text = block.ToString();
+            blockMarker.SetActive(true); // Show the block marker
+        }
+        else
+        {
+            blockMarker.SetActive(false); // Hide the block marker when block is 0
         }
     }
 
@@ -122,6 +135,8 @@ public class Character : MonoBehaviour
     public void ShowMarker()
     {
         marker.SetActive(true); // Make marker visible
+        marker.GetComponent<Marker>().SetEnabled(true);
+        marker.GetComponent<Marker>().SetHover(false);
         markerIsActive = true;
         markerRenderer.color = defaultMarkerColor; // Reset to default color
     }
@@ -138,6 +153,8 @@ public class Character : MonoBehaviour
     {
         if (markerIsActive)
         {
+            marker.GetComponent<Marker>().SetEnabled(false);
+            marker.GetComponent<Marker>().SetHover(true);
             markerRenderer.color = hoverMarkerColor; // Change color on hover
         }
     }
@@ -146,6 +163,8 @@ public class Character : MonoBehaviour
     {
         if (markerIsActive)
         {
+            marker.GetComponent<Marker>().SetEnabled(true);
+            marker.GetComponent<Marker>().SetHover(false);
             markerRenderer.color = defaultMarkerColor; // Revert color when hover ends
         }
     }

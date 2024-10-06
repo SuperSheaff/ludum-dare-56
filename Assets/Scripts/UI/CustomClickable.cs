@@ -51,6 +51,8 @@ public class CustomClickable : MonoBehaviour
     {
         if (!isInteractable) return;
 
+        spriteRenderer.sprite = originalSprite;
+
         // Invoke any custom onClick methods
         if (onClick != null)
         {
