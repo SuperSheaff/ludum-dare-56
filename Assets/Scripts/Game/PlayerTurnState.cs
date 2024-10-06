@@ -21,6 +21,7 @@ public class PlayerTurnState : GameState
             {
                 character.StartTurn();
                 character.HideIntentMarker();
+                character.ResetBlock();
             }
         }
 
@@ -38,7 +39,7 @@ public class PlayerTurnState : GameState
         Debug.Log("Player's turn has ended.");
     }
 
-    private void AssignEnemyIntent()
+    public void AssignEnemyIntent()
     {
         // Create an array of ducks
         Duck[] ducks = { gameController.rogueDuck, gameController.knightDuck, gameController.wizardDuck };

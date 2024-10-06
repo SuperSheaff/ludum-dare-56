@@ -26,6 +26,7 @@ public class GameController : MonoBehaviour
 
     // Reference to the game-over screen (assigned via the inspector)
     public GameObject gameOverScreen;
+    public GameObject UIContainer; // Reference to the UIContainer object
 
     // References to spawned ducks and enemy
     public Duck rogueDuck;
@@ -41,7 +42,6 @@ public class GameController : MonoBehaviour
 
     public GameObject endTurnButton;        // Button to end the player's turn
     public GameObject unselectButton;       // Button to unselect the card
-    public GameObject nextRoomButton;       // Button to unselect the card
 
     // Reference to the main camera
     public Camera mainCamera;
@@ -74,6 +74,19 @@ public class GameController : MonoBehaviour
     public float backgroundWidth = 38.4f;  // Width of each background tile
     private int currentRoomIndex = 0;    // Keep track of which room the player is currently in
 
+    public int baseEnemyHealth      = 10;  // Starting health for enemies
+    public int baseEnemyDamage      = 5;   // Starting damage for enemies
+    public float healthMultiplier   = 1.23f;  // Scaling factor for health
+    public float damageMultiplier   = 1.23f;  // Scaling factor for damage
+    
+    // Add a random variation factor
+    public float randomHealthVariation = 0.23f;  // 10% variation in health scaling
+    public float randomDamageVariation = 0.23f;  // 10% variation in damage scaling
+
+    public int currentLevel = 1;  // Track the current level
+    public TextMeshPro levelText;        // Reference to the TextMeshPro component for displaying health
+    public TextMeshPro drawPileText;        // Reference to the TextMeshPro component for displaying health
+    public TextMeshPro discardPileText;        // Reference to the TextMeshPro component for displaying health
 
     private void Awake()
     {
@@ -161,7 +174,7 @@ public class GameController : MonoBehaviour
         DuckParty.Add(wizardDuck); // Add Wizard Duck to available targets
 
         // Initialize enemy with health and attack values
-        enemy.InitializeCharacter("Enemy", 1, 15, CharacterType.Enemy);
+        enemy.InitializeCharacter("Enemy", baseEnemyHealth, baseEnemyDamage, CharacterType.Enemy);
         allCharacters.Add(enemy); // Add Enemy to available targets
         Enemies.Add(enemy); // Add Enemy to available targets
     }
@@ -189,6 +202,7 @@ public class GameController : MonoBehaviour
 
         // Show "Unselect" button to cancel the action
         unselectButton.SetActive(true);
+        endTurnButton.SetActive(false);
 
         // Show markers on valid targets based on the card's target type
         ShowMarkersForValidTargets();
@@ -205,6 +219,7 @@ public class GameController : MonoBehaviour
             // Reset UI elements
             chooseTargetText.SetActive(false);
             unselectButton.SetActive(false);
+            endTurnButton.SetActive(true);
 
             // Clear the current card and display reference
             currentCard = null;
@@ -224,7 +239,7 @@ public class GameController : MonoBehaviour
             case TargetType.AllAllies:
                 foreach (Character target in allCharacters)
                 {
-                    if (target.IsAlly())
+                    if (target.IsAlly() && target.currentHealth > 0)
                     {
                         validTargets.Add(target);
                     }
@@ -234,7 +249,7 @@ public class GameController : MonoBehaviour
             case TargetType.Knight:
                 foreach (Character target in allCharacters)
                 {
-                    if (target.characterType == CharacterType.Knight) // Filter specific class
+                    if (target.characterType == CharacterType.Knight && target.currentHealth > 0) // Filter specific class
                     {
                         validTargets.Add(target);
                     }
@@ -244,7 +259,7 @@ public class GameController : MonoBehaviour
             case TargetType.Wizard:
                 foreach (Character target in allCharacters)
                 {
-                    if (target.characterType == CharacterType.Wizard) // Filter specific class
+                    if (target.characterType == CharacterType.Wizard && target.currentHealth > 0) // Filter specific class
                     {
                         validTargets.Add(target);
                     }
@@ -254,7 +269,7 @@ public class GameController : MonoBehaviour
             case TargetType.Rogue:
                 foreach (Character target in allCharacters)
                 {
-                    if (target.characterType == CharacterType.Rogue) // Filter specific class
+                    if (target.characterType == CharacterType.Rogue && target.currentHealth > 0) // Filter specific class
                     {
                         validTargets.Add(target);
                     }
@@ -288,6 +303,8 @@ public class GameController : MonoBehaviour
     {
         Character targetCharacter = target.GetComponent<Character>();
 
+        unselectButton.SetActive(false);
+
         if (targetCharacter != null)
         {
             if (HasEnoughMana(currentCard))
@@ -317,8 +334,13 @@ public class GameController : MonoBehaviour
         // Hide all markers after selection
         HideAllMarkers();
 
+        // Move the card data to the discard pile
+        CardController.instance.DiscardCard(playedCard);
+
         // Hide "Choose Target" text
         chooseTargetText.gameObject.SetActive(false);
+        unselectButton.SetActive(false);
+        endTurnButton.SetActive(true);
 
         // Change color based on card type
         switch (playedCard.cardName)
@@ -375,6 +397,22 @@ public class GameController : MonoBehaviour
                 {
                     knightDuck.TakeDamage(playedCard.secondaryAmount);
                     Debug.Log($"Knight Duck takes {playedCard.secondaryAmount} damage from the reckless attack!");
+
+                    // Check if the Knight Duck dies from this attack
+                    if (knightDuck.currentHealth <= 0)
+                    {
+                        Debug.Log("Knight Duck has died!");
+
+                        // Check if the enemy's current intent was to attack the Knight Duck
+                        if (enemy.GetTarget() == knightDuck)
+                        {
+                            Debug.Log("Knight Duck was the enemy's target, recalculating intent...");
+
+                            // Recalculate the intent for the enemy
+                            playerTurnState.AssignEnemyIntent();
+                            knightDuck.HideIntentMarker();
+                        }
+                    }
                 }
                 else
                 {
@@ -395,9 +433,6 @@ public class GameController : MonoBehaviour
 
         // Deduct mana
         GameController.instance.UseMana(playedCard.manaCost);
-
-        // Move the card data to the discard pile
-        CardController.instance.DiscardCard(playedCard);
 
         // Destroy the visual card (CardDisplay)
         CardController.instance.DeleteSelectedCard();
@@ -430,7 +465,10 @@ public class GameController : MonoBehaviour
 
     public void UpdateUI()
     {
-        manaText.text = currentMana.ToString();
+        manaText.text           = currentMana.ToString();
+        levelText.text          = "Level " + currentLevel.ToString();
+        drawPileText.text       = CardController.instance.drawPile.Count.ToString();
+        discardPileText.text    = CardController.instance.discardPile.Count.ToString();
     }
 
     public void UpdateIntentMarkers()
@@ -535,16 +573,6 @@ public class GameController : MonoBehaviour
         ducksParent.transform.position = targetPosition; // Ensure it reaches the final position
     }
 
-    public void GenerateRewards()
-    {
-        Debug.Log("GenerateRewards");
-    }
-
-    public void GetRandomCardFromLibrary()
-    {
-
-    }
-
     // Function to calculate and return the next room's location
     public Vector3 GenerateNextRoomLocation()
     {
@@ -558,12 +586,6 @@ public class GameController : MonoBehaviour
         return new Vector3(nextRoomX, 0, -500f); // Keeping y = 0, z = -10 (default camera z)
     }
 
-    // Function to move to the next room
-    public void MoveToNextRoom()
-    {
-        currentRoomIndex++;
-    }
-
     public void PrepareNextLevel()
     {
 
@@ -572,6 +594,8 @@ public class GameController : MonoBehaviour
 
     public IEnumerator IE_PrepareNextLevel()
     {
+        // Increase the level
+        currentLevel++;
 
         GenerateBackgroundTiles();
 
@@ -583,11 +607,17 @@ public class GameController : MonoBehaviour
             Destroy(enemy.gameObject);    // Destroy the enemy GameObject
         }
 
+        // Calculate scaled health and damage with added spice (rng)
+        float healthRNG = Random.Range(1f - randomHealthVariation, 1f + randomHealthVariation);
+        float damageRNG = Random.Range(1f - randomDamageVariation, 1f + randomDamageVariation);
 
-        // Spawn a new enemy with 1 health
-        Vector3 enemySpawnPosition = enemySpawnPoint.position; // Adjust based on your setup
+        int scaledHealth = Mathf.RoundToInt(baseEnemyHealth * Mathf.Pow(healthMultiplier, currentLevel - 1) * healthRNG);
+        int scaledDamage = Mathf.RoundToInt(baseEnemyDamage * Mathf.Pow(damageMultiplier, currentLevel - 1) * damageRNG);
+
+        // Spawn a new enemy with scaled health and damage
+        Vector3 enemySpawnPosition = enemySpawnPoint.position; 
         enemy = Instantiate(enemyPrefab, enemySpawnPosition, Quaternion.identity).GetComponent<Enemy>();
-        enemy.InitializeCharacter("New Enemy", 1, 15, CharacterType.Enemy); // Set health and other attributes
+        enemy.InitializeCharacter("New Enemy", scaledHealth, scaledDamage, CharacterType.Enemy);
 
         allCharacters.Add(enemy); // Add Enemy to available targets
         Enemies.Add(enemy); // Add Enemy to available targets
@@ -595,18 +625,22 @@ public class GameController : MonoBehaviour
         // Optionally: Reset player status effects, health, or block here
         foreach (Duck duck in DuckParty)
         {
-            // Example: Remove block or reset evade
             duck.block = 0;
             duck.ResetEvadeChance();
             duck.UpdateStatText();
+
+            if (duck.currentHealth <= 0)
+            {
+                duck.Revive(3);
+            }
         }
 
         // Move the camera to the next room
-        CameraController.instance.MoveCameraToNextTile(GenerateNextRoomLocation(), 0);
+        CameraController.instance.MoveCameraToNextTile(GenerateNextRoomLocation(), 0, false);
 
         // Wait for 1 second before transitioning back to player turn state
         yield return new WaitForSeconds(2f);
-        
+
         // Shuffle the deck and fill the draw pile
         CardController.instance.ShuffleDeckIntoDrawPile();
 
@@ -614,4 +648,16 @@ public class GameController : MonoBehaviour
         stateMachine.ChangeState(playerTurnState);
     }
 
+    // Method to move the UI to the next level
+    public void MoveUIToNextLevel()
+    {
+        // Get the current position of the UIContainer
+        Vector3 currentPosition = UIContainer.transform.position;
+
+        // Calculate the new position (move it 2x background width to the right)
+        Vector3 nextPosition = new Vector3(currentPosition.x + 2 * backgroundWidth, currentPosition.y, currentPosition.z);
+
+        // Set the UIContainer's position to the new position
+        UIContainer.transform.position = nextPosition;
+    }
 }

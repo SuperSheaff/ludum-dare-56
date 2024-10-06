@@ -54,7 +54,7 @@ public class Character : MonoBehaviour
     }
 
     // Initialize character stats and health text
-    public void InitializeCharacter(string name, int health, int attack, CharacterType type)
+    public virtual void InitializeCharacter(string name, int health, int attack, CharacterType type)
     {
         characterName   = name;
         maxHealth       = health;
@@ -82,6 +82,13 @@ public class Character : MonoBehaviour
         block += amount;
         Debug.Log($"{characterName} gained {amount} block. Current block: {block}");
 
+        UpdateStatText(); // Update UI after healing
+    }
+
+    // Method to reset block
+    public void ResetBlock()
+    {
+        block = 0;
         UpdateStatText(); // Update UI after healing
     }
 

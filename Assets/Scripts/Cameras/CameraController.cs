@@ -27,12 +27,12 @@ public class CameraController : MonoBehaviour
     }
 
     // Function to move the camera to the next tile
-    public void MoveCameraToNextTile(Vector3 targetPosition, float delayTime)
+    public void MoveCameraToNextTile(Vector3 targetPosition, float delayTime, bool reward)
     {
-        StartCoroutine(SmoothMoveCamera(targetPosition, delayTime));
+        StartCoroutine(SmoothMoveCamera(targetPosition, delayTime, reward));
     }
 
-    private IEnumerator SmoothMoveCamera(Vector3 targetPosition, float delayTime)
+    private IEnumerator SmoothMoveCamera(Vector3 targetPosition, float delayTime, bool reward)
     {
         yield return new WaitForSeconds(delayTime);
 
@@ -57,5 +57,13 @@ public class CameraController : MonoBehaviour
 
         // Ensure the final position is exactly the target
         transform.position = targetPosition;
+
+        yield return new WaitForSeconds(delayTime);
+
+        if (reward)
+        {
+            CardController.instance.GenerateRewardCards();
+        }
+
     }
 }

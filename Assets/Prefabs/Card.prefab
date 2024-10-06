@@ -12,12 +12,12 @@ GameObject:
   - component: {fileID: 3955685893320635270}
   - component: {fileID: 5153455359381039664}
   m_Layer: 0
-  m_Name: CardName
+  m_Name: CardDescription
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6090608538452445465
 RectTransform:
   m_ObjectHideFlags: 0
@@ -34,7 +34,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 7.28}
+  m_AnchoredPosition: {x: 0, y: -3.79}
   m_SizeDelta: {x: 17.42, y: 1.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &3955685893320635270
@@ -76,7 +76,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1321262027
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &5153455359381039664
@@ -247,7 +247,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1321262027
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &1608058606870354280
@@ -418,7 +418,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1321262027
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: f2b2b6590663bc94790d7d575d01ffde, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -443,13 +443,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b242d263e99cb443b6480ae120e901f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardNameText: {fileID: 5153455359381039664}
   manaCostText: {fileID: 1608058606870354280}
   cardSpriteRenderer: {fileID: 7450007436259037964}
   moveSpeed: 500
   hoverHeight: 6.4
   hoverZOffset: -100
   disabledIcon: {fileID: 9128850082893485583}
+  IsReward: 0
   targetPosition: {x: 0, y: 0, z: 0}
   hoverOffset: {x: 0, y: 0, z: 0}
   isHovered: 0
@@ -579,7 +579,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1321262027
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 885a4241c5d5edb43a28659712f04c40, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

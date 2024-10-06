@@ -10,19 +10,8 @@ public class ChooseRewardState : GameState
     {
         Debug.Log("Player's turn has started.");
 
-        
-        // Revive ducks
-        foreach (Duck duck in gameController.DuckParty)
-        {
-            if (duck.currentHealth <= 0)
-            {
-                duck.Revive(3); // Revive with 3 health
-            }
-        }
-
         gameController.endTurnButton.SetActive(false);
         gameController.unselectButton.SetActive(false);
-        gameController.nextRoomButton.SetActive(true);
 
         // Move ducks to the next dungeon tile
         CardController.instance.ClearAllCards();
@@ -30,7 +19,7 @@ public class ChooseRewardState : GameState
         // Move ducks to the next dungeon tile
         gameController.MoveDucksToNextRoom();
 
-        CameraController.instance.MoveCameraToNextTile(gameController.GenerateNextRoomLocation(), 1f);
+        CameraController.instance.MoveCameraToNextTile(gameController.GenerateNextRoomLocation(), 1f, true);
 
     }
 

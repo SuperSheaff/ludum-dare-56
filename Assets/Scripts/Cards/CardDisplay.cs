@@ -3,7 +3,6 @@ using TMPro;
 
 public class CardDisplay : MonoBehaviour
 {
-    public TextMeshPro cardNameText;
     public TextMeshPro manaCostText;
     public SpriteRenderer cardSpriteRenderer;
 
@@ -13,6 +12,8 @@ public class CardDisplay : MonoBehaviour
 
     private bool isDisabled = false; // To track if the card is disabled
     public GameObject disabledIcon; // Reference to an icon that appears when the card is disabled
+
+    public bool IsReward = false;  // This will identify if the card is a reward card
 
     // Add a reference to the card's logical data
     public Card cardData { get; private set; } // This is the missing 'cardData'
@@ -51,12 +52,12 @@ public class CardDisplay : MonoBehaviour
     }
 
     // Function to set card display based on the logical Card data
-    public void SetCardData(Card cardData)
+    public void SetCardData(Card cardData, bool isReward = false)
     {
         this.cardData = cardData; // Set the card's data
+        this.IsReward = isReward;  // Mark if it's a reward card
 
         manaCostText.text = cardData.manaCost.ToString();
-        cardNameText.text = cardData.cardName.ToString();
 
         if (cardData.isDisabled)
         {
@@ -95,16 +96,56 @@ public class CardDisplay : MonoBehaviour
 
     private void Update()
     {
-        if (isBeingPlayed && hoverEnabled)
+        if (!IsReward)
         {
-            // Move towards the play position when card is being played
-            MoveCardTowards(cardController.playCardPosition.position);
+            if (isBeingPlayed && hoverEnabled)
+            {
+                // Move towards the play position when card is being played
+                MoveCardTowards(cardController.playCardPosition.position);
+            }
+            else
+            {
+                // Normal movement towards the assigned position with hover offset
+                Vector3 finalTargetPosition = targetPosition + hoverOffset;
+                MoveCardTowards(finalTargetPosition);
+            }
         }
-        else
+    }
+
+ 
+    // Handle hover effect
+    private void OnMouseEnter()
+    {
+        if (!isBeingPlayed  && hoverEnabled && !isDisabled && !IsReward) // Disable hover if the card is being played
         {
-            // Normal movement towards the assigned position with hover offset
-            Vector3 finalTargetPosition = targetPosition + hoverOffset;
-            MoveCardTowards(finalTargetPosition);
+            isHovered = true;
+            hoverOffset = new Vector3(0, hoverHeight, hoverZOffset);  // Apply hover offset (Y and Z)
+        }
+    }
+
+    private void OnMouseExit()
+    {
+        if (!isBeingPlayed  && hoverEnabled && !isDisabled && !IsReward) // Disable hover if the card is being played
+        {
+            isHovered = false;
+            hoverOffset = Vector3.zero;  // Reset hover offset
+        }
+    }
+
+    private void OnMouseDown()
+    {
+        if (IsReward)
+        {
+            CardController.instance.AddCardToDeck(this.cardData);
+        }
+        // When clicked, move the card to the play position and start target selection
+        else if (isHovered && !isBeingPlayed  && hoverEnabled && !isDisabled)
+        {
+            isBeingPlayed = true;
+            hoverOffset = Vector3.zero;  // Reset hover offset
+
+            // Send this card to the CardController
+            CardController.instance.OnCardSelected(this);
         }
     }
 
@@ -134,37 +175,6 @@ public class CardDisplay : MonoBehaviour
         }
     }
 
-    // Handle hover effect
-    private void OnMouseEnter()
-    {
-        if (!isBeingPlayed  && hoverEnabled && !isDisabled) // Disable hover if the card is being played
-        {
-            isHovered = true;
-            hoverOffset = new Vector3(0, hoverHeight, hoverZOffset);  // Apply hover offset (Y and Z)
-        }
-    }
-
-    private void OnMouseExit()
-    {
-        if (!isBeingPlayed  && hoverEnabled && !isDisabled) // Disable hover if the card is being played
-        {
-            isHovered = false;
-            hoverOffset = Vector3.zero;  // Reset hover offset
-        }
-    }
-
-    private void OnMouseDown()
-    {
-        // When clicked, move the card to the play position and start target selection
-        if (isHovered && !isBeingPlayed  && hoverEnabled && !isDisabled)
-        {
-            isBeingPlayed = true;
-            hoverOffset = Vector3.zero;  // Reset hover offset
-
-            // Send this card to the CardController
-            CardController.instance.OnCardSelected(this);
-        }
-    }
 
     // Function to disable the card (prevents it from being played)
     public void Disable()
