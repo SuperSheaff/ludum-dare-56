@@ -14,24 +14,27 @@ public class EnemyTurnState : GameState
             if (character.IsEnemy())
             {
                 character.StartTurn();
+                character.HideIntentMarker();
             }
         }
 
-        // Enemy attacks a random duck here
-        AttackRandomDuck();
+        // Attack the duck that was chosen as the target during the player's turn
+        AttackChosenTarget();
     }
 
-    private void AttackRandomDuck()
+    private void AttackChosenTarget()
     {
-        // Choose a random duck
-        Duck[] ducks = { gameController.rogueDuck, gameController.knightDuck, gameController.wizardDuck };
-        Duck randomDuck = ducks[Random.Range(0, ducks.Length)];
+        Duck targetDuck = gameController.enemy.GetTarget(); // Get the enemy's chosen target
 
-        // Enemy attacks the chosen duck if the duck is alive
-        if (randomDuck.currentHealth > 0)
+        // If the target is still alive, attack
+        if (targetDuck != null && targetDuck.currentHealth > 0)
         {
-            gameController.enemy.Attack(randomDuck); // Attack the random duck
-            Debug.Log($"Enemy attacked {randomDuck.characterName}!");
+            gameController.enemy.Attack(targetDuck);
+            Debug.Log($"Enemy attacked {targetDuck.characterName}.");
+        }
+        else
+        {
+            Debug.Log("The chosen target is dead or invalid. Enemy skips attack.");
         }
 
         // End the enemy's turn after the attack

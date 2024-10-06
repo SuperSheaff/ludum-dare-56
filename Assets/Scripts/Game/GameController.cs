@@ -11,8 +11,11 @@ public class GameController : MonoBehaviour
     public GameStartState gameStartState;
     public PlayerTurnState playerTurnState;
     public EnemyTurnState enemyTurnState;
+    public ChooseRewardState chooseRewardState;
 
     // Prefabs
+    public GameObject ducksParent;
+    public float duckMoveSpeed = 50f;
     public GameObject duckPrefab;
     public GameObject enemyPrefab;
     public GameObject cardPrefab;
@@ -20,6 +23,8 @@ public class GameController : MonoBehaviour
     // Position where cards will be displayed
     public List<Character> allCharacters; // The list of available targets in the scene
 
+    // Reference to the game-over screen (assigned via the inspector)
+    public GameObject gameOverScreen;
 
     // References to spawned ducks and enemy
     public Duck rogueDuck;
@@ -46,8 +51,8 @@ public class GameController : MonoBehaviour
     public float cardSpacing = 2.0f; // Adjust this for more or less spread
     public float cardYOffset = -3.0f; // Adjust this to move the cards lower on the screen
 
-    public List<Character> enemyCharacters; // List of all enemy characters
-    public List<Character> allyCharacters;  // List of all ally characters
+    public List<Enemy> Enemies; // List of all enemy characters
+    public List<Duck> DuckParty;  // List of all ally characters
     public GameObject chooseTargetText;     // Text for "Choose Target"
 
     private Card currentCard;               // The card currently being played
@@ -57,6 +62,16 @@ public class GameController : MonoBehaviour
     public int baseMana         = 5;
     public int currentMana      = 5;    // Example mana value, this can be dynamic
     public TextMeshPro manaText;        // Reference to the TextMeshPro component for displaying health
+
+    public Transform tileParent; // Parent for background tiles
+    public GameObject dungeonTilePrefab;
+    public GameObject wallTilePrefab;
+
+    private List<GameObject> backgroundTiles = new List<GameObject>();
+
+    public float backgroundWidth = 20f;  // Width of each background tile
+    private int currentRoomIndex = 0;    // Keep track of which room the player is currently in
+
 
     private void Awake()
     {
@@ -110,6 +125,7 @@ public class GameController : MonoBehaviour
         gameStartState      = new GameStartState(this);
         playerTurnState     = new PlayerTurnState(this);
         enemyTurnState      = new EnemyTurnState(this);
+        chooseRewardState   = new ChooseRewardState(this);
 
         stateMachine.Initialize(gameStartState);
     }
@@ -129,18 +145,22 @@ public class GameController : MonoBehaviour
         rogueDuck.InitializeCharacter("Rogue Duck", 10, 10, CharacterType.Rogue);
         rogueDuck.InitializeDuck(DuckType.Rogue);
         allCharacters.Add(rogueDuck); // Add Rogue Duck to available targets
+        DuckParty.Add(rogueDuck); // Add Rogue Duck to available targets
 
         knightDuck.InitializeCharacter("Knight Duck", 15, 8, CharacterType.Knight);
         knightDuck.InitializeDuck(DuckType.Knight);
         allCharacters.Add(knightDuck); // Add Knight Duck to available targets
+        DuckParty.Add(knightDuck); // Add Knight Duck to available targets
 
         wizardDuck.InitializeCharacter("Wizard Duck", 8, 12, CharacterType.Wizard);
         wizardDuck.InitializeDuck(DuckType.Wizard);
         allCharacters.Add(wizardDuck); // Add Wizard Duck to available targets
+        DuckParty.Add(wizardDuck); // Add Wizard Duck to available targets
 
         // Initialize enemy with health and attack values
         enemy.InitializeCharacter("Enemy", 10, 15, CharacterType.Enemy);
         allCharacters.Add(enemy); // Add Enemy to available targets
+        Enemies.Add(enemy); // Add Enemy to available targets
     }
 
     // Function to end the player's turn (called by the End Turn button)
@@ -328,17 +348,25 @@ public class GameController : MonoBehaviour
                 target.TakeDamage(playedCard.primaryAmount);
                 break;
 
-            // Change intent to knight duck
+            // Set the enemy's intent to the Knight Duck
             case "Taunt":
-                target.TakeDamage(playedCard.primaryAmount);
+                foreach (Character character in allCharacters)
+                {
+                    if (character.IsEnemy())
+                    {
+                        character.GetComponent<Enemy>().SetTarget(knightDuck);
+                    }
+                }
+                
+                // Recheck all markers to show that the knight is now the target
+                UpdateIntentMarkers();
+
+                Debug.Log("Taunt: Enemy's intent changed to attack the Knight Duck.");
                 break;
 
             // Deal primary damage to the target and Knight Duck takes secondary damage
             case "Reckless":
                 target.TakeDamage(playedCard.primaryAmount);
-
-                // Find the knight duck and deal secondary damage to it
-                Character knightDuck = GameController.instance.knightDuck;
 
                 if (knightDuck != null)
                 {
@@ -400,5 +428,105 @@ public class GameController : MonoBehaviour
     public void UpdateUI()
     {
         manaText.text = currentMana.ToString();
+    }
+
+    public void UpdateIntentMarkers()
+    {
+        // First, hide the intent marker on all ducks
+        rogueDuck.HideIntentMarker();
+        knightDuck.HideIntentMarker();
+        wizardDuck.HideIntentMarker();
+
+        // Get the current enemy's target
+        Duck currentTarget = enemy.GetTarget();
+
+        // Show the intent marker on the current target (which should now be the Knight Duck)
+        if (currentTarget != null)
+        {
+            currentTarget.ShowIntentMarker();
+            Debug.Log($"{currentTarget.characterName} is now the target.");
+        }
+    }
+
+    public void OnCharacterDeath(CharacterType characterType)
+    {
+        // Disable the class-specific cards in the hand
+        if (characterType == CharacterType.Enemy)
+        {
+            // Change state
+            stateMachine.ChangeState(new ChooseRewardState(this));
+        }
+        else
+        {
+            CardController.instance.DisableCardsByType(characterType);
+        }
+    }
+
+    // Method to trigger the game-over screen
+    public void TriggerGameOver()
+    {
+        // Show the game-over screen (if assigned in the inspector)
+        if (gameOverScreen != null)
+        {
+            gameOverScreen.SetActive(true);
+        }
+
+        // Log the game-over event
+        Debug.Log("Game Over!");
+
+        // Disable any further gameplay actions (if needed)
+        DisableGameActions();
+    }
+
+    // Method to disable further game actions (e.g., disable buttons, stop input, etc.)
+    private void DisableGameActions()
+    {
+        // Example: Disable player input, buttons, or anything else
+        // You can add any code here that prevents further game interactions
+        endTurnButton.SetActive(false);
+        // Additional logic to freeze gameplay can go here
+    }
+
+    public void GenerateBackgroundTiles()
+    {
+        // Tile 1 - Dungeon
+        GameObject tile1 = Instantiate(dungeonTilePrefab, new Vector3(0, 0, 0), Quaternion.identity, tileParent);
+        backgroundTiles.Add(tile1);
+        
+        // Tile 2 - Wall
+        GameObject tile2 = Instantiate(wallTilePrefab, new Vector3(backgroundWidth, 0, 0), Quaternion.identity, tileParent);
+        backgroundTiles.Add(tile2);
+        
+        // Tile 3 - Dungeon
+        GameObject tile3 = Instantiate(dungeonTilePrefab, new Vector3(2 * backgroundWidth, 0, 0), Quaternion.identity, tileParent);
+        backgroundTiles.Add(tile3);
+    }
+
+    public void MoveDucksToNextRoom()
+    {
+        // Parent the ducks to a GameObject and move the parent
+        ducksParent.transform.position = Vector3.MoveTowards(ducksParent.transform.position, new Vector3(2 * backgroundWidth, 0, 0), duckMoveSpeed * Time.deltaTime);
+    }
+
+    public void GenerateRewards()
+    {
+
+    }
+
+    public void GetRandomCardFromLibrary()
+    {
+
+    }
+
+    // Calculate the X position of the next room
+    public float nextRoomX
+    {
+        get { return currentRoomIndex * backgroundWidth; }
+    }
+
+    // Function to move to the next room
+    public void MoveToNextRoom()
+    {
+        currentRoomIndex++;
     }
 }

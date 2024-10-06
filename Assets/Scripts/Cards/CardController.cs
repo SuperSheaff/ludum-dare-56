@@ -254,4 +254,84 @@ public class CardController : MonoBehaviour
             card.cardSpriteRenderer.color = Color.white;
         }
     }
+
+    // Function to disable cards of a specific type across all piles (hand, draw, discard)
+    public void DisableCardsByType(CharacterType characterType)
+    {
+        
+        // Disable cards in hand
+        foreach (CardDisplay card in hand)
+        {
+            if (card.cardData.cardType == GetCardTypeFromCharacterType(characterType))
+            {
+                card.Disable();
+            }
+        }
+
+        // Disable cards in the draw pile
+        foreach (Card card in drawPile)
+        {
+            if (card.cardType == GetCardTypeFromCharacterType(characterType))
+            {
+                card.isDisabled = true; // Flag as disabled for when it's drawn
+            }
+        }
+
+        // Disable cards in the discard pile
+        foreach (Card card in discardPile)
+        {
+            if (card.cardType == GetCardTypeFromCharacterType(characterType))
+            {
+                card.isDisabled = true; // Flag as disabled for when it's drawn
+            }
+        }
+    }
+
+    // Function to enable cards of a specific type across all piles (hand, draw, discard)
+    public void EnableCardsByType(CharacterType characterType)
+    {
+        // Enable cards in hand
+        foreach (CardDisplay card in hand)
+        {
+            if (card.cardData.cardType == GetCardTypeFromCharacterType(characterType))
+            {
+                card.Enable();
+            }
+        }
+
+        // Enable cards in the draw pile
+        foreach (Card card in drawPile)
+        {
+            if (card.cardType == GetCardTypeFromCharacterType(characterType))
+            {
+                card.isDisabled = false; // Remove disabled flag
+            }
+        }
+
+        // Enable cards in the discard pile
+        foreach (Card card in discardPile)
+        {
+            if (card.cardType == GetCardTypeFromCharacterType(characterType))
+            {
+                card.isDisabled = false; // Remove disabled flag
+            }
+        }
+    }
+    
+    // Utility function to map CharacterType to CardType
+    private CardType GetCardTypeFromCharacterType(CharacterType characterType)
+    {
+        switch (characterType)
+        {
+            case CharacterType.Knight:
+                return CardType.Knight;
+            case CharacterType.Wizard:
+                return CardType.Wizard;
+            case CharacterType.Rogue:
+                return CardType.Rogue;
+            default:
+                return CardType.Neutral;
+        }
+    }
+
 }
