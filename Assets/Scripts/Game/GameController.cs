@@ -33,7 +33,8 @@ public class GameController : MonoBehaviour
     public Transform wizardSpawnPoint;
     public Transform enemySpawnPoint;
 
-    public GameObject endTurnButton; // Button to end the player's turn
+    public GameObject endTurnButton;        // Button to end the player's turn
+    public GameObject unselectButton;       // Button to unselect the card
 
     // Reference to the main camera
     public Camera mainCamera;
@@ -163,8 +164,31 @@ public class GameController : MonoBehaviour
         // Show "Choose Target" text
         chooseTargetText.SetActive(true);
 
+        // Show "Unselect" button to cancel the action
+        unselectButton.SetActive(true);
+
         // Show markers on valid targets based on the card's target type
         ShowMarkersForValidTargets();
+    }
+
+    // Method to handle the unselect card button click
+    public void OnUnselectCardButton()
+    {
+        if (currentCardDisplay != null)
+        {
+            // Call the CardController to return the card to the hand
+            CardController.instance.ReturnCardToHand();
+
+            // Reset UI elements
+            chooseTargetText.SetActive(false);
+            unselectButton.SetActive(false);
+
+            // Clear the current card and display reference
+            currentCard = null;
+            currentCardDisplay = null;
+
+            HideAllMarkers();
+        }
     }
 
     // Show markers on valid targets

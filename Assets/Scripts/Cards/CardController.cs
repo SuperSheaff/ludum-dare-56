@@ -7,10 +7,11 @@ public class CardController : MonoBehaviour
 {
     public static CardController instance;
 
-    public List<Card> deck = new List<Card>(); // Logical card data
-    public List<Card> drawPile = new List<Card>(); // Draw pile, shuffled from the deck
-    public List<Card> discardPile = new List<Card>(); // Discarded cards
-    public List<CardDisplay> hand = new List<CardDisplay>(); // Cards in the player's hand
+    public List<Card> deck          = new List<Card>(); // Logical card data
+    public List<Card> drawPile      = new List<Card>(); // Draw pile, shuffled from the deck
+    public List<Card> discardPile   = new List<Card>(); // Discarded cards
+    public List<CardDisplay> hand   = new List<CardDisplay>(); // Cards in the player's hand
+    
     public CardDisplay selectedCard; // Card currently selected and played
 
     public GameObject cardPrefab; // Prefab containing the CardDisplay script
@@ -128,6 +129,21 @@ public class CardController : MonoBehaviour
                 Debug.Log("Both draw pile and discard pile are empty.");
             }
         }
+    }
+
+    // Function to return the card to the hand
+    public void ReturnCardToHand()
+    {
+        // Add the card back to the hand
+        hand.Add(selectedCard);
+
+        // Clear the selected card
+        selectedCard = null;
+
+        // Move the card back to its original position in the hand
+        UpdateHandCardPositions();
+
+        EnableHoverOnAllCards();
     }
 
     // Function called when a card is selected
