@@ -52,7 +52,6 @@ public class CardDisplay : MonoBehaviour
     {
         this.cardData = cardData; // Set the card's data
 
-        cardNameText.text = cardData.cardName;
         manaCostText.text = cardData.manaCost.ToString();
 
         // Change color based on card type
@@ -79,7 +78,7 @@ public class CardDisplay : MonoBehaviour
             case "Neutral Attack":
                 cardSpriteRenderer.sprite = neutralAttackCardSprite;
                 break;
-            case "Neutral Attack":
+            case "Neutral Block":
                 cardSpriteRenderer.sprite = neutralAttackCardSprite;
                 break;
         }

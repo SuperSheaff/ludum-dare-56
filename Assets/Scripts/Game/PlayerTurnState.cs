@@ -10,6 +10,7 @@ public class PlayerTurnState : GameState
         
         // Draw cards at the start of the player's turn
         gameController.ResetMana();
+        CardController.instance.CheckDrawPile(); 
         CardController.instance.DrawHand(); 
         gameController.endTurnButton.SetActive(true); // Show the End Turn button
     }

@@ -17,18 +17,19 @@ public class Card
 {
     public string cardName;
     public CardType cardType;
-    public TargetType targetType; // Define which target this card can affect
+    public TargetType targetType;   // Define which target this card can affect
     public int manaCost;
-    public int attackPower;
-    public int blockPower;
+    public int primaryAmount;       // Generic value (e.g., for attack, heal, etc.)
+    public int secondaryAmount;     // Generic value (e.g., for block, buff, etc.)
 
-    public Card(string name, CardType type, TargetType target, int mana, int attack, int block)
+    public Card(string name, CardType type, TargetType target, int mana, int primary, int secondary)
     {
-        cardName = name;
-        cardType = type;
-        targetType = target;
-        manaCost = mana;
-        attackPower = attack;
-        blockPower = block;
+        cardName            = name;
+        cardType            = type;
+        targetType          = target;
+        manaCost            = mana;
+        primaryAmount       = primary;
+        secondaryAmount     = secondary;
     }
 }
+
