@@ -278,14 +278,33 @@ public class GameController : MonoBehaviour
         // Hide "Choose Target" text
         chooseTargetText.gameObject.SetActive(false);
 
-        // Example effect: If the card is an attack card, damage the target
-        if (playedCard.attackPower > 0)
+        // Change color based on card type
+        switch (playedCard.cardName)
         {
-            target.TakeDamage(playedCard.attackPower);
-        }
-        else if (playedCard.blockPower > 0)
-        {
-            target.GainBlock(playedCard.blockPower);
+            case "Smoke Bomb":
+                target.TakeDamage(playedCard.primaryAmount);
+                break;
+            case "Poison":
+                target.TakeDamage(playedCard.primaryAmount);
+                break;
+            case "Heal":
+                target.TakeDamage(playedCard.primaryAmount);
+                break;
+            case "Fireball":
+                target.TakeDamage(playedCard.primaryAmount);
+                break;
+            case "Taunt":
+                target.TakeDamage(playedCard.primaryAmount);
+                break;
+            case "Reckless":
+                target.TakeDamage(playedCard.primaryAmount);
+                break;
+            case "Neutral Attack":
+                target.TakeDamage(playedCard.primaryAmount);
+                break;
+            case "Neutral Block":
+                target.GainBlock(playedCard.primaryAmount);
+                break;
         }
 
         // Deduct mana

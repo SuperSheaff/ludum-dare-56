@@ -37,15 +37,14 @@ public class CardController : MonoBehaviour
     // Function to initialize the deck with predefined cards
     public void InitializeDeck()
     {
-        deck.Add(new Card("Rogue Slash", CardType.Rogue, TargetType.Enemy, 1, 10, 0));
-        deck.Add(new Card("Knight Shield", CardType.Knight, TargetType.AllAllies, 2, 0, 15)); // Targets a specific ally, e.g., a Knight
-        deck.Add(new Card("Wizard Fireball", CardType.Wizard, TargetType.Enemy, 3, 20, 0));
-        deck.Add(new Card("Neutral Strike", CardType.Neutral, TargetType.Enemy, 1, 5, 0));
-        deck.Add(new Card("Neutral Strike", CardType.Neutral, TargetType.Enemy, 1, 5, 0));
-        deck.Add(new Card("Neutral Strike", CardType.Neutral, TargetType.Enemy, 1, 5, 0));
-        deck.Add(new Card("Neutral Strike", CardType.Neutral, TargetType.Enemy, 1, 5, 0));
-        deck.Add(new Card("Neutral Block", CardType.Neutral, TargetType.AllAllies, 1, 0, 5));
-        deck.Add(new Card("Neutral Block", CardType.Neutral, TargetType.AllAllies, 1, 0, 5));
+        deck.Add(new Card("Smoke Bomb",         CardType.Rogue, TargetType.AllAllies,   1, 10, 0));
+        deck.Add(new Card("Poison",             CardType.Rogue, TargetType.Enemy,       2, 0, 15)); // Targets a specific ally, e.g., a Knight
+        deck.Add(new Card("Heal",               CardType.Wizard, TargetType.AllAllies,  1, 5, 0));
+        deck.Add(new Card("Fireball",           CardType.Knight, TargetType.Enemy,      1, 5, 0));
+        deck.Add(new Card("Taunt",              CardType.Knight, TargetType.Knight,     1, 5, 0));
+        deck.Add(new Card("Reckless",           CardType.Neutral, TargetType.Enemy,     1, 5, 0));
+        deck.Add(new Card("Neutral Attack",     CardType.Neutral, TargetType.AllAllies, 1, 0, 5));
+        deck.Add(new Card("Neutral Block",      CardType.Neutral, TargetType.AllAllies, 1, 0, 5));
     }
 
     // Function to shuffle the deck and move the cards to the draw pile
@@ -105,6 +104,32 @@ public class CardController : MonoBehaviour
         StartCoroutine(SetAllCardsTargetPositions());
     }
 
+    // Function to check if the draw pile is empty, and if it is, shuffle the discard pile back in
+    public void CheckDrawPile()
+    {
+        // Check if the draw pile is empty
+        if (drawPile.Count == 0)
+        {
+            if (discardPile.Count > 0)
+            {
+                // Move all discard pile cards back into the draw pile
+                drawPile.AddRange(discardPile);
+
+                // Clear the discard pile
+                discardPile.Clear();
+
+                // Shuffle the new draw pile
+                ShuffleList(drawPile);
+
+                Debug.Log("Draw pile was empty. Discard pile shuffled into draw pile.");
+            }
+            else
+            {
+                Debug.Log("Both draw pile and discard pile are empty.");
+            }
+        }
+    }
+
     // Function called when a card is selected
     public void OnCardSelected(CardDisplay cardDisplay)
     {
@@ -141,8 +166,10 @@ public class CardController : MonoBehaviour
             float cardXPos = startPoint.x + (i * stepDistance);
             Vector3 targetPosition = new Vector3(cardXPos, startPoint.y, startPoint.z);
 
+            float zPos = (-i * 1f) + 1f; // Cards placed further back have larger Z-values
+
             // Set target position including Z
-            hand[i].SetTargetPosition(new Vector3(cardXPos, startPoint.y, startPoint.z));
+            hand[i].SetTargetPosition(new Vector3(cardXPos, startPoint.y, zPos));
         }
     }
 
