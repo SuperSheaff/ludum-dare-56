@@ -62,5 +62,7 @@ public class Duck : Character
                 spriteRenderer.sprite = wizardSprite;
                 break;
         }
+
+        CardController.instance.EnableCardsByType(this.characterType);
     }
 }

@@ -7,12 +7,17 @@ public class CardController : MonoBehaviour
 {
     public static CardController instance;
 
-    public List<Card> deck          = new List<Card>(); // Logical card data
-    public List<Card> drawPile      = new List<Card>(); // Draw pile, shuffled from the deck
-    public List<Card> discardPile   = new List<Card>(); // Discarded cards
-    public List<CardDisplay> hand   = new List<CardDisplay>(); // Cards in the player's hand
+    public List<Card> cardLibrary               = new List<Card>(); // Logical card data
+    public List<Card> deck                      = new List<Card>(); // Logical card data
+    public List<Card> drawPile                  = new List<Card>(); // Draw pile, shuffled from the deck
+    public List<Card> discardPile               = new List<Card>(); // Discarded cards
+    public List<CardDisplay> hand               = new List<CardDisplay>(); // Cards in the player's hand
+    public List<Card> rewardCards               = new List<Card>(); // Cards in the player's hand
+    public List<CardDisplay> rewardCardDisplays = new List<CardDisplay>(); // Cards in the player's hand
 
     public CardDisplay selectedCard; // Card currently selected and played
+
+    public Transform[] endPositions;
 
     public GameObject cardPrefab; // Prefab containing the CardDisplay script
     public Transform cardSpawningPoint;
@@ -347,8 +352,101 @@ public class CardController : MonoBehaviour
         hand.Clear();
         drawPile.Clear();
         discardPile.Clear();
+        discardPile.Clear();
 
         Debug.Log("All cards, including displays, have been cleared.");
+    }
+
+    public void InitializeCardLibrary()
+    {
+        // Initialize the card library with all unique cards
+        cardLibrary.Add(new Card("Smoke Bomb",         CardType.Rogue,     TargetType.AllAllies,       1, 1, 0));
+        cardLibrary.Add(new Card("Poison",             CardType.Rogue,     TargetType.Enemy,           2, 2, 3));
+        cardLibrary.Add(new Card("Heal",               CardType.Wizard,    TargetType.AllAllies,       1, 4, 0));
+        cardLibrary.Add(new Card("Fireball",           CardType.Wizard,    TargetType.Enemy,           1, 3, 0));
+        cardLibrary.Add(new Card("Taunt",              CardType.Knight,    TargetType.Knight,          1, 1, 0));
+        cardLibrary.Add(new Card("Reckless",           CardType.Knight,    TargetType.Enemy,           1, 8, 4));
+        cardLibrary.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 1, 0));
+        cardLibrary.Add(new Card("Neutral Block",      CardType.Neutral,   TargetType.AllAllies,       1, 5, 0));
+        // Add more unique cards as needed
+    }
+
+    public void GenerateRewardCards()
+    {
+        GameController.instance.MoveUIToNextLevel();
+        
+        // Ensure the card library is initialized
+        if (cardLibrary == null || cardLibrary.Count == 0)
+        {
+            InitializeCardLibrary();
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            // Randomly pick a card from the card library
+            Card randomCard = cardLibrary[Random.Range(0, cardLibrary.Count)];
+            rewardCards.Add(randomCard);
+        }
+
+        // Spawn the cards off-screen and then animate them into the target position
+        for (int i = 0; i < rewardCards.Count; i++)
+        {
+            // Instantiate visual card (CardDisplay) at start position below the screen
+            Vector3 startPosition = endPositions[i].position - new Vector3(0, 38.4f, 0); // 38.4 units below the target position
+            GameObject cardObj = Instantiate(cardPrefab, startPosition, Quaternion.identity);
+
+            // Set card data (display the card)
+            CardDisplay cardDisplay = cardObj.GetComponent<CardDisplay>();
+            cardDisplay.SetCardData(rewardCards[i], true);
+            rewardCardDisplays.Add(cardDisplay);
+
+            // Animate the card moving into position
+            StartCoroutine(AnimateCardIntoPosition(cardDisplay, endPositions[i].position));
+        }
+
+        Debug.Log("Reward cards generated and moving into position.");
+    }
+
+    private IEnumerator AnimateCardIntoPosition(CardDisplay card, Vector3 endPosition)
+    {
+        float moveSpeed = 50f; // Adjust the speed as necessary
+        Vector3 startPosition = card.transform.position;
+
+        float elapsedTime = 0;
+        float totalTime = 0.5f; // Time for the animation to complete
+
+        while (elapsedTime < totalTime)
+        {
+            elapsedTime += Time.deltaTime;
+            card.transform.position = Vector3.Lerp(startPosition, endPosition, elapsedTime / totalTime);
+            yield return null;
+        }
+
+        // Ensure the card ends exactly at the target position
+        card.transform.position = endPosition;
+    }
+
+    public void AddCardToDeck(Card selectedCard)
+    {
+        
+        deck.Add(selectedCard); // Add the card to the player's deck
+        Debug.Log($"Card {selectedCard.cardName} added to the deck!");
+
+
+        // Loop through the list and destroy each CardDisplay object
+        foreach (CardDisplay cardDisplay in rewardCardDisplays)
+        {
+            if (cardDisplay != null) // Make sure the object exists before destroying it
+            {
+                Destroy(cardDisplay.gameObject); // Destroy the GameObject attached to the CardDisplay
+            }
+        }
+
+        // Clear the list after destroying all the objects
+        rewardCardDisplays.Clear();
+        rewardCards.Clear();
+
+        GameController.instance.PrepareNextLevel();
     }
 
 }
