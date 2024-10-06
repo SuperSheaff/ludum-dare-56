@@ -198,14 +198,21 @@ public class GameController : MonoBehaviour
         currentCardDisplay  = cardDisplay;              // Store the visual card display
 
         // Show "Choose Target" text
-        chooseTargetText.SetActive(true);
+        if (currentMana >= currentCard.manaCost)
+        {
+            chooseTargetText.GetComponent<TextMeshPro>().text = "Choose Target";
+            chooseTargetText.SetActive(true);
+            ShowMarkersForValidTargets();
+        }
+        else
+        {
+            chooseTargetText.GetComponent<TextMeshPro>().text = "Not enough Mana";
+            chooseTargetText.SetActive(true);
+        }
 
         // Show "Unselect" button to cancel the action
         unselectButton.SetActive(true);
         endTurnButton.SetActive(false);
-
-        // Show markers on valid targets based on the card's target type
-        ShowMarkersForValidTargets();
     }
 
     // Method to handle the unselect card button click
@@ -356,7 +363,6 @@ public class GameController : MonoBehaviour
                     }
                 }
                 break;
-
 
             // Apply poison for primaryAmount damage over secondaryAmount turns
             case "Poison":
