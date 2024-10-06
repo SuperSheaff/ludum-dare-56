@@ -198,9 +198,15 @@ public class Character : MonoBehaviour
     // Function to update the health and block text display
     public void UpdateStatText()
     {
-        if (healthText != null)
+        if (currentHealth > 0)
         {
             healthText.text = currentHealth.ToString();
+            healthMarker.SetActive(true); // Show the block marker
+        }
+        else
+        {
+            healthMarker.SetActive(false); // Hide the block marker when block is 0
+
         }
 
         // If block is greater than 0, display the block text and marker

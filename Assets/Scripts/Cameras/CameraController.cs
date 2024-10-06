@@ -27,13 +27,15 @@ public class CameraController : MonoBehaviour
     }
 
     // Function to move the camera to the next tile
-    public void MoveCameraToNextTile(Vector3 targetPosition)
+    public void MoveCameraToNextTile(Vector3 targetPosition, float delayTime)
     {
-        StartCoroutine(SmoothMoveCamera(targetPosition));
+        StartCoroutine(SmoothMoveCamera(targetPosition, delayTime));
     }
 
-    private IEnumerator SmoothMoveCamera(Vector3 targetPosition)
+    private IEnumerator SmoothMoveCamera(Vector3 targetPosition, float delayTime)
     {
+        yield return new WaitForSeconds(delayTime);
+
         // Cache the initial position of the camera
         Vector3 initialPosition = transform.position;
         

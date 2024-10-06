@@ -41,6 +41,7 @@ public class GameController : MonoBehaviour
 
     public GameObject endTurnButton;        // Button to end the player's turn
     public GameObject unselectButton;       // Button to unselect the card
+    public GameObject nextRoomButton;       // Button to unselect the card
 
     // Reference to the main camera
     public Camera mainCamera;
@@ -497,12 +498,15 @@ public class GameController : MonoBehaviour
             TilesParent = new GameObject("TilesParent"); // Create a parent object for background tiles
         }
 
-        // Tile 1 - Dungeon
-        GameObject tile1 = Instantiate(dungeonTilePrefab, new Vector3(0, 0, 0), Quaternion.identity, TilesParent.transform);
+        // Calculate the x-position for the new tiles based on the number of existing tiles
+        float startPositionX = backgroundTiles.Count * backgroundWidth;
+
+        // Tile 1 - Dungeon (at startPositionX)
+        GameObject tile1 = Instantiate(dungeonTilePrefab, new Vector3(startPositionX, 0, 0), Quaternion.identity, TilesParent.transform);
         backgroundTiles.Add(tile1);
 
-        // Tile 2 - Wall
-        GameObject tile2 = Instantiate(wallTilePrefab, new Vector3(backgroundWidth, 0, 0), Quaternion.identity, TilesParent.transform);
+        // Tile 2 - Wall (at startPositionX + backgroundWidth)
+        GameObject tile2 = Instantiate(wallTilePrefab, new Vector3(startPositionX + backgroundWidth, 0, 0), Quaternion.identity, TilesParent.transform);
         backgroundTiles.Add(tile2);
     }
 
@@ -559,4 +563,55 @@ public class GameController : MonoBehaviour
     {
         currentRoomIndex++;
     }
+
+    public void PrepareNextLevel()
+    {
+
+        StartCoroutine(IE_PrepareNextLevel());
+    }
+
+    public IEnumerator IE_PrepareNextLevel()
+    {
+
+        GenerateBackgroundTiles();
+
+        // Clear the previous enemy
+        if (enemy != null)
+        {
+            allCharacters.Remove(enemy);  // Remove enemy from allCharacters list
+            Enemies.Remove(enemy);        // Remove enemy from Enemies list
+            Destroy(enemy.gameObject);    // Destroy the enemy GameObject
+        }
+
+
+        // Spawn a new enemy with 1 health
+        Vector3 enemySpawnPosition = enemySpawnPoint.position; // Adjust based on your setup
+        enemy = Instantiate(enemyPrefab, enemySpawnPosition, Quaternion.identity).GetComponent<Enemy>();
+        enemy.InitializeCharacter("New Enemy", 1, 15, CharacterType.Enemy); // Set health and other attributes
+
+        allCharacters.Add(enemy); // Add Enemy to available targets
+        Enemies.Add(enemy); // Add Enemy to available targets
+
+        // Optionally: Reset player status effects, health, or block here
+        foreach (Duck duck in DuckParty)
+        {
+            // Example: Remove block or reset evade
+            duck.block = 0;
+            duck.ResetEvadeChance();
+            duck.UpdateStatText();
+        }
+
+        // Move the camera to the next room
+        CameraController.instance.MoveCameraToNextTile(GenerateNextRoomLocation(), 0);
+
+        // Wait for 1 second before transitioning back to player turn state
+        yield return new WaitForSeconds(2f);
+        
+        // Shuffle the deck and fill the draw pile
+        CardController.instance.ShuffleDeckIntoDrawPile();
+
+        // Transition back to player turn state
+        stateMachine.ChangeState(playerTurnState);
+    }
+
 }

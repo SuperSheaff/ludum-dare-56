@@ -22,6 +22,7 @@ public class ChooseRewardState : GameState
 
         gameController.endTurnButton.SetActive(false);
         gameController.unselectButton.SetActive(false);
+        gameController.nextRoomButton.SetActive(true);
 
         // Move ducks to the next dungeon tile
         CardController.instance.ClearAllCards();
@@ -29,7 +30,8 @@ public class ChooseRewardState : GameState
         // Move ducks to the next dungeon tile
         gameController.MoveDucksToNextRoom();
 
-        CameraController.instance.MoveCameraToNextTile(gameController.GenerateNextRoomLocation());
+        CameraController.instance.MoveCameraToNextTile(gameController.GenerateNextRoomLocation(), 1f);
+
     }
 
     public override void Update()

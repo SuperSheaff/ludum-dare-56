@@ -118,6 +118,13 @@ public class CardDisplay : MonoBehaviour
     // Set the target position (used by the controller to move the card in the hand)
     public void SetTargetPosition(Vector3 newPosition)
     {
+        // Check if the target position contains NaN values
+        if (float.IsNaN(targetPosition.x) || float.IsNaN(targetPosition.y) || float.IsNaN(targetPosition.z))
+        {
+            Debug.LogError("targetPosition position contains NaN values: " + targetPosition);
+            return;
+        }
+
         targetPosition = newPosition;
 
         // Reset hover offset when setting the new position

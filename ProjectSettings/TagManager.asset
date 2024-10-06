@@ -42,7 +42,7 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Environment
+  - name: Background
     uniqueID: 3404826283
     locked: 0
   - name: Enemy
@@ -50,6 +50,9 @@ TagManager:
     locked: 0
   - name: Duck
     uniqueID: 2322383467
+    locked: 0
+  - name: Foreground
+    uniqueID: 352073041
     locked: 0
   - name: UI
     uniqueID: 1321262027
