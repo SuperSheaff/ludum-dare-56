@@ -126,20 +126,20 @@ public class GameController : MonoBehaviour
         enemy = Instantiate(enemyPrefab, enemySpawnPoint.position, Quaternion.identity).GetComponent<Enemy>();
 
         // Initialize ducks with health, attack values, and types
-        rogueDuck.InitializeCharacter("Rogue Duck", 100, 10, CharacterType.Rogue);
+        rogueDuck.InitializeCharacter("Rogue Duck", 10, 10, CharacterType.Rogue);
         rogueDuck.InitializeDuck(DuckType.Rogue);
         availableTargets.Add(rogueDuck.gameObject); // Add Rogue Duck to available targets
 
-        knightDuck.InitializeCharacter("Knight Duck", 150, 8, CharacterType.Knight);
+        knightDuck.InitializeCharacter("Knight Duck", 15, 8, CharacterType.Knight);
         knightDuck.InitializeDuck(DuckType.Knight);
         availableTargets.Add(knightDuck.gameObject); // Add Knight Duck to available targets
 
-        wizardDuck.InitializeCharacter("Wizard Duck", 80, 12, CharacterType.Wizard);
+        wizardDuck.InitializeCharacter("Wizard Duck", 8, 12, CharacterType.Wizard);
         wizardDuck.InitializeDuck(DuckType.Wizard);
         availableTargets.Add(wizardDuck.gameObject); // Add Wizard Duck to available targets
 
         // Initialize enemy with health and attack values
-        enemy.InitializeCharacter("Enemy", 200, 15, CharacterType.Enemy);
+        enemy.InitializeCharacter("Enemy", 10, 15, CharacterType.Enemy);
         availableTargets.Add(enemy.gameObject); // Add Enemy to available targets
     }
 

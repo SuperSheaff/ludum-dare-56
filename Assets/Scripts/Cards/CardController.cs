@@ -11,7 +11,7 @@ public class CardController : MonoBehaviour
     public List<Card> drawPile      = new List<Card>(); // Draw pile, shuffled from the deck
     public List<Card> discardPile   = new List<Card>(); // Discarded cards
     public List<CardDisplay> hand   = new List<CardDisplay>(); // Cards in the player's hand
-    
+
     public CardDisplay selectedCard; // Card currently selected and played
 
     public GameObject cardPrefab; // Prefab containing the CardDisplay script
@@ -136,6 +136,7 @@ public class CardController : MonoBehaviour
     {
         // Add the card back to the hand
         hand.Add(selectedCard);
+        selectedCard.isBeingPlayed = false;
 
         // Clear the selected card
         selectedCard = null;
@@ -149,9 +150,6 @@ public class CardController : MonoBehaviour
     // Function called when a card is selected
     public void OnCardSelected(CardDisplay cardDisplay)
     {
-        // Disable hover for all cards in the hand
-        DisableHoverOnAllCards();
-
         // Add the card to selectedCard
         selectedCard = cardDisplay;
 
@@ -163,6 +161,9 @@ public class CardController : MonoBehaviour
 
         // Notify the GameController to show the selected card UI
         GameController.instance.UpdateUICardSelected(cardDisplay);
+
+        // Disable hover for all cards in the hand and make them slightly transparent
+        DisableHoverOnAllCards();
 
         // Reset hand positions after removing the card
         UpdateHandCardPositions();
@@ -233,12 +234,13 @@ public class CardController : MonoBehaviour
         UpdateHandCardPositions();
     }
 
-    // Function to disable hovering on all cards in the hand
+    // Function to disable hovering and set transparency on all cards in the hand
     public void DisableHoverOnAllCards()
     {
         foreach (CardDisplay card in hand)
         {
             card.DisableHover(); // Disable hover on each card
+            card.cardSpriteRenderer.color = Color.gray;
         }
     }
 
@@ -246,8 +248,8 @@ public class CardController : MonoBehaviour
     {
         foreach (CardDisplay card in hand)
         {
-            card.EnableHover(); // Disable hover on each card
+            card.EnableHover(); // Enable hover on each card
+            card.cardSpriteRenderer.color = Color.white;
         }
     }
-
 }
