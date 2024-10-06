@@ -9,6 +9,7 @@ public class PlayerTurnState : GameState
         Debug.Log("Player's turn has started.");
         
         // Draw cards at the start of the player's turn
+        gameController.ResetMana();
         CardController.instance.DrawHand(); 
         gameController.endTurnButton.SetActive(true); // Show the End Turn button
     }

@@ -47,11 +47,15 @@ public class GameController : MonoBehaviour
 
     public List<Character> enemyCharacters; // List of all enemy characters
     public List<Character> allyCharacters;  // List of all ally characters
-    public Transform playCardPosition;      // Position where cards move to when played
     public GameObject chooseTargetText;     // Text for "Choose Target"
 
     private Card currentCard;               // The card currently being played
     private CardDisplay currentCardDisplay; // The CardDisplay of the current card
+
+    public int startingMana     = 5;
+    public int baseMana         = 5;
+    public int currentMana      = 5;    // Example mana value, this can be dynamic
+    public TextMeshPro manaText;        // Reference to the TextMeshPro component for displaying health
 
     private void Awake()
     {
@@ -82,6 +86,8 @@ public class GameController : MonoBehaviour
     private void Update()
     {
         stateMachine.Update();
+
+        UpdateUI();
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -149,13 +155,10 @@ public class GameController : MonoBehaviour
     }
 
     // Method to play a card (triggered when clicking on a card)
-    public void OnCardPlayed(CardDisplay cardDisplay)
+    public void UpdateUICardSelected(CardDisplay cardDisplay)
     {
         currentCard         = cardDisplay.cardData;     // Store the logical card data
         currentCardDisplay  = cardDisplay;              // Store the visual card display
-
-        // Move the card to the "play card" position
-        cardDisplay.SetTargetPosition(playCardPosition.position);
 
         // Show "Choose Target" text
         chooseTargetText.SetActive(true);
@@ -245,43 +248,83 @@ public class GameController : MonoBehaviour
 
         if (targetCharacter != null)
         {
-            ApplyCardEffect(targetCharacter); // Apply card effects
-
-            // Hide all markers after selection
-            HideAllMarkers();
-
-            // Hide "Choose Target" text
-            chooseTargetText.gameObject.SetActive(false);
+            if (HasEnoughMana(currentCard))
+            {
+                PlayCard(targetCharacter, currentCard); // Apply card effects
+            }
+            else
+            {
+                Debug.Log("NOT ENOUGH MANA");
+            }
         }
     }
 
     // Hide markers on all characters
     private void HideAllMarkers()
     {
-        foreach (Character enemy in enemyCharacters)
+        foreach (GameObject character in availableTargets)
         {
-            enemy.HideMarker();
-        }
-
-        foreach (Character ally in allyCharacters)
-        {
-            ally.HideMarker();
+            character.GetComponent<Character>().HideMarker();
         }
     }
 
     // Apply the card's effect to the target
-    private void ApplyCardEffect(Character target)
+    private void PlayCard(Character target, Card playedCard)
     {
+
+        // Hide all markers after selection
+        HideAllMarkers();
+
+        // Hide "Choose Target" text
+        chooseTargetText.gameObject.SetActive(false);
+
         // Example effect: If the card is an attack card, damage the target
-        if (currentCard.attackPower > 0)
+        if (playedCard.attackPower > 0)
         {
-            target.TakeDamage(currentCard.attackPower);
+            target.TakeDamage(playedCard.attackPower);
         }
-        else if (currentCard.blockPower > 0)
+        else if (playedCard.blockPower > 0)
         {
-            target.GainBlock(currentCard.blockPower);
+            target.GainBlock(playedCard.blockPower);
         }
 
-        // After applying the card, you may want to discard or remove the card from hand, etc.
+        // Deduct mana
+        GameController.instance.UseMana(playedCard.manaCost);
+
+        // Move the card data to the discard pile
+        CardController.instance.DiscardCard(playedCard);
+
+        // Destroy the visual card (CardDisplay)
+        CardController.instance.DeleteSelectedCard();
+        CardController.instance.EnableHoverOnAllCards();
+
+        // Update the hand positions
+        CardController.instance.UpdateHandCardPositions();
+    }
+
+    // Function to check if there's enough mana for the selected card
+    public bool HasEnoughMana(Card currentCard)
+    {
+        return currentMana >= currentCard.manaCost;
+    }
+
+    // Reduce mana when a card is played
+    public void UseMana(int manaCost)
+    {
+        currentMana -= manaCost;
+        Debug.Log("Mana used: " + manaCost + ". Current mana: " + currentMana);
+    }
+
+    public void ResetMana()
+    {
+        if (currentMana < baseMana)
+        {
+            currentMana = baseMana;
+        }
+    }
+
+    public void UpdateUI()
+    {
+        manaText.text = currentMana.ToString();
     }
 }

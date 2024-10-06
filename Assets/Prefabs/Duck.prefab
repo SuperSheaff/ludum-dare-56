@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 8144801855223914924}
   - component: {fileID: 7722364177298171897}
   - component: {fileID: 6775161153585328705}
+  - component: {fileID: 5767114924289358159}
   m_Layer: 0
   m_Name: Duck
   m_TagString: Untagged
@@ -192,11 +193,58 @@ MonoBehaviour:
   marker: {fileID: 2682255878733445371}
   defaultMarkerColor: {r: 1, g: 1, b: 1, a: 1}
   hoverMarkerColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  characterType: 0
+  markerIsActive: 0
   duckType: 0
   spriteRenderer: {fileID: 7722364177298171897}
   rogueSprite: {fileID: 21300000, guid: aa127477b6548754d9278dceb0525136, type: 3}
   knightSprite: {fileID: 21300000, guid: 54ba92725a2d5784f9a2f1f733dcbd97, type: 3}
   wizardSprite: {fileID: 21300000, guid: 28b61fa0c9feae247a398a641e58b29c, type: 3}
+--- !u!61 &5767114924289358159
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3767171708616039059}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 3.2, y: 3.2}
+    newSize: {x: 3.37, y: 3.37}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 3.2, y: 3.2}
+  m_EdgeRadius: 0
 --- !u!1 &3824903457607905022
 GameObject:
   m_ObjectHideFlags: 0

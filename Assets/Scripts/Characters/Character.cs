@@ -25,10 +25,13 @@ public class Character : MonoBehaviour
     public Color hoverMarkerColor = Color.yellow; // Marker color when hovered
     public CharacterType characterType; // Add this to define the class of the character
 
+    public bool markerIsActive;
+
     private void Start()
     {
         // Initialize marker visibility and color
         marker.SetActive(false);
+        markerIsActive = false;
         markerRenderer = marker.GetComponent<SpriteRenderer>();
         markerRenderer.color = defaultMarkerColor;
 
@@ -119,6 +122,7 @@ public class Character : MonoBehaviour
     public void ShowMarker()
     {
         marker.SetActive(true); // Make marker visible
+        markerIsActive = true;
         markerRenderer.color = defaultMarkerColor; // Reset to default color
     }
 
@@ -126,12 +130,13 @@ public class Character : MonoBehaviour
     public void HideMarker()
     {
         marker.SetActive(false); // Hide marker
+        markerIsActive = false;
     }
 
     // Function to change the marker's color when hovered over
     private void OnMouseEnter()
     {
-        if (marker.activeInHierarchy)
+        if (markerIsActive)
         {
             markerRenderer.color = hoverMarkerColor; // Change color on hover
         }
@@ -139,7 +144,7 @@ public class Character : MonoBehaviour
 
     private void OnMouseExit()
     {
-        if (marker.activeInHierarchy)
+        if (markerIsActive)
         {
             markerRenderer.color = defaultMarkerColor; // Revert color when hover ends
         }
@@ -148,7 +153,7 @@ public class Character : MonoBehaviour
     // Handle clicking on the character to select them as a target
     private void OnMouseDown()
     {
-        if (marker.activeInHierarchy)
+        if (markerIsActive)
         {
             GameController.instance.OnTargetChosen(this.gameObject); // Notify GameController that this target was chosen
         }
