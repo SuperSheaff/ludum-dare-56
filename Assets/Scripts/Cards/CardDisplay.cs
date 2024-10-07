@@ -64,6 +64,10 @@ public class CardDisplay : MonoBehaviour
         {
             Disable();
         }
+        else
+        {
+            Enable();
+        }
 
         // Change color based on card type
         switch (cardData.cardName)

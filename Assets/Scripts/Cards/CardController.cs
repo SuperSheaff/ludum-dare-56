@@ -472,4 +472,41 @@ public class CardController : MonoBehaviour
         GameController.instance.PrepareNextLevel();
     }
 
+    public void ResetCards()
+    {
+        // Step 1: Clear all card displays in hand
+        foreach (CardDisplay cardDisplay in hand)
+        {
+            if (cardDisplay != null)
+            {
+                Destroy(cardDisplay.gameObject); // Destroy the visual representation in the hand
+            }
+        }
+        hand.Clear(); // Clear the hand
+
+        // Step 2: Clear draw pile, discard pile, and reward-related lists
+        drawPile.Clear();
+        discardPile.Clear();
+        rewardCards.Clear();
+
+        // Step 3: Destroy any reward card displays that might still be active
+        foreach (CardDisplay rewardCardDisplay in rewardCardDisplays)
+        {
+            if (rewardCardDisplay != null)
+            {
+                Destroy(rewardCardDisplay.gameObject); // Destroy the visual representation of reward cards
+            }
+        }
+        rewardCardDisplays.Clear();
+
+        // Step 4: Re-initialize the deck (resetting it to the predefined starting cards)
+        deck.Clear();
+        InitializeDeck(); // This function will add the predefined cards back to the deck
+
+        // Step 5: Shuffle the deck into the draw pile
+        ShuffleDeckIntoDrawPile();
+
+        Debug.Log("Cards have been reset successfully.");
+    }
+
 }

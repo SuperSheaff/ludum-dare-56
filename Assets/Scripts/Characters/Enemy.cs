@@ -1,13 +1,28 @@
 using UnityEngine;
 using TMPro; // For using TextMeshPro
 
+public enum EnemyType
+{
+    Peasant,
+    Knight,
+    King
+}
+
 // Enemy class inheriting from Character
 public class Enemy : Character
 {
     public TextMeshPro damageText; // Text component to display the damage
     public GameObject damageMarker; // Reference to the damage marker object
+    public SpriteRenderer spriteRenderer;
+
+    public Sprite PeasantSprite;
+    public Sprite KnightSprite;
+    public Sprite KingSprite;
+
+    public EnemyType enemyType;
 
     private Duck targetDuck; // The duck chosen as the target for the enemy's attack
+
 
     // Set the enemy's target duck
     public void SetTarget(Duck duck)
@@ -27,6 +42,28 @@ public class Enemy : Character
         base.InitializeCharacter(name, health, attack, type, homeTransform);
 
         // Update the damage display and marker
+        UpdateDamageDisplay();
+    }
+
+    // Function to initialize the enemy based on its type
+    public void InitializeEnemy(EnemyType type)
+    {
+        enemyType = type;
+
+        // Assign sprite and stats based on enemy type
+        switch (enemyType)
+        {
+            case EnemyType.Peasant:
+                spriteRenderer.sprite = PeasantSprite;
+                break;
+            case EnemyType.Knight:
+                spriteRenderer.sprite = KnightSprite;
+                break;
+            case EnemyType.King:
+                spriteRenderer.sprite = KingSprite;
+                break;
+        }
+
         UpdateDamageDisplay();
     }
 
