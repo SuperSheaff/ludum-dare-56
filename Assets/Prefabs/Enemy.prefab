@@ -25172,6 +25172,11 @@ MonoBehaviour:
   homePosition: {fileID: 0}
   damageText: {fileID: 2191142163966738304}
   damageMarker: {fileID: 6238561075638965402}
+  spriteRenderer: {fileID: 2987243007992704691}
+  PeasantSprite: {fileID: 21300000, guid: 5c301bce16f21f84d95e9c0a44d5c162, type: 3}
+  KnightSprite: {fileID: 21300000, guid: fbeae0663a5fb2b4383c333b08f03cb8, type: 3}
+  KingSprite: {fileID: 21300000, guid: b53233dc7999d7f46aea94662104ad81, type: 3}
+  enemyType: 0
 --- !u!61 &1863371438379283611
 BoxCollider2D:
   m_ObjectHideFlags: 0

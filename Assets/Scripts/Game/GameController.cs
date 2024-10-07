@@ -13,6 +13,7 @@ public class GameController : MonoBehaviour
     public PlayerTurnState playerTurnState;
     public EnemyTurnState enemyTurnState;
     public ChooseRewardState chooseRewardState;
+    public GameWinState gameWinState;
 
     // Prefabs
     public GameObject ducksParent;
@@ -26,6 +27,7 @@ public class GameController : MonoBehaviour
 
     // Reference to the game-over screen (assigned via the inspector)
     public GameObject gameOverScreen;
+    public GameObject gameWinScreen;
     public GameObject UIContainer; // Reference to the UIContainer object
 
     // References to spawned ducks and enemy
@@ -50,8 +52,8 @@ public class GameController : MonoBehaviour
     public CardController cardController;
 
     // Positioning values for cards
-    public float cardSpacing = 2.0f; // Adjust this for more or less spread
-    public float cardYOffset = -3.0f; // Adjust this to move the cards lower on the screen
+    public float cardSpacing    = 2.0f; // Adjust this for more or less spread
+    public float cardYOffset    = -3.0f; // Adjust this to move the cards lower on the screen
 
     public List<Enemy> Enemies; // List of all enemy characters
     public List<Duck> DuckParty;  // List of all ally characters
@@ -72,10 +74,10 @@ public class GameController : MonoBehaviour
 
     private List<GameObject> backgroundTiles = new List<GameObject>();
 
-    public float backgroundWidth = 38.4f;  // Width of each background tile
-    private int currentRoomIndex = 0;    // Keep track of which room the player is currently in
+    public float backgroundWidth    = 38.4f;  // Width of each background tile
+    private int currentRoomIndex    = 0;    // Keep track of which room the player is currently in
 
-    public int baseEnemyHealth      = 10;  // Starting health for enemies
+    public int baseEnemyHealth      = 1;  // Starting health for enemies
     public int baseEnemyDamage      = 5;   // Starting damage for enemies
     public float healthMultiplier   = 1.23f;  // Scaling factor for health
     public float damageMultiplier   = 1.23f;  // Scaling factor for damage
@@ -84,10 +86,15 @@ public class GameController : MonoBehaviour
     public float randomHealthVariation = 0.23f;  // 10% variation in health scaling
     public float randomDamageVariation = 0.23f;  // 10% variation in damage scaling
 
-    public int currentLevel = 1;  // Track the current level
+    public int currentLevel = 1;        // Track the current level
     public TextMeshPro levelText;        // Reference to the TextMeshPro component for displaying health
     public TextMeshPro drawPileText;        // Reference to the TextMeshPro component for displaying health
     public TextMeshPro discardPileText;        // Reference to the TextMeshPro component for displaying health
+
+    // Predefined enemy health and damage for each level
+    public List<int> enemyHealthPerLevel = new List<int>() { 10, 20, 30, 40 }; // Example values
+    public List<int> enemyDamagePerLevel = new List<int>() { 5, 10, 15, 20 };  // Example values
+
 
     private void Awake()
     {
@@ -143,6 +150,7 @@ public class GameController : MonoBehaviour
         playerTurnState     = new PlayerTurnState(this);
         enemyTurnState      = new EnemyTurnState(this);
         chooseRewardState   = new ChooseRewardState(this);
+        gameWinState        = new GameWinState(this);
 
         stateMachine.Initialize(gameStartState);
     }
@@ -175,7 +183,8 @@ public class GameController : MonoBehaviour
         DuckParty.Add(wizardDuck); // Add Wizard Duck to available targets
 
         // Initialize enemy with health and attack values
-        enemy.InitializeCharacter("Enemy", baseEnemyHealth, baseEnemyDamage, CharacterType.Enemy, enemySpawnPoint);
+        enemy.InitializeCharacter("Enemy", enemyHealthPerLevel[0], enemyHealthPerLevel[1], CharacterType.Enemy, enemySpawnPoint);
+        enemy.InitializeEnemy(EnemyType.Peasant);
         allCharacters.Add(enemy); // Add Enemy to available targets
         Enemies.Add(enemy); // Add Enemy to available targets
     }
@@ -625,8 +634,15 @@ public class GameController : MonoBehaviour
         // Disable the class-specific cards in the hand
         if (characterType == CharacterType.Enemy)
         {
-            // Change state
-            stateMachine.ChangeState(new ChooseRewardState(this));
+            if (currentLevel > 8)
+            {
+                // Change state
+                stateMachine.ChangeState(new ChooseRewardState(this));
+            }
+            else
+            {
+                stateMachine.ChangeState(gameWinState);
+            }
         }
         else
         {
@@ -740,20 +756,35 @@ public class GameController : MonoBehaviour
             Destroy(enemy.gameObject);    // Destroy the enemy GameObject
         }
 
-        // Calculate scaled health and damage with added spice (rng)
-        float healthRNG = Random.Range(1f - randomHealthVariation, 1f + randomHealthVariation);
-        float damageRNG = Random.Range(1f - randomDamageVariation, 1f + randomDamageVariation);
+        // Define the enemy type for this level (you can choose how to assign enemy types based on the level)
+       EnemyType enemyType;
+        if (currentLevel < 5) 
+        {
+            enemyType = EnemyType.Peasant;
+        }
+        else if (currentLevel >= 5 && currentLevel < 8) 
+        {
+            enemyType = EnemyType.Knight;
+        }
+        else 
+        {
+            enemyType = EnemyType.King;
+        }
 
-        int scaledHealth = Mathf.RoundToInt(baseEnemyHealth * Mathf.Pow(healthMultiplier, currentLevel - 1) * healthRNG);
-        int scaledDamage = Mathf.RoundToInt(baseEnemyDamage * Mathf.Pow(damageMultiplier, currentLevel - 1) * damageRNG);
 
-        // Spawn a new enemy with scaled health and damage
+        // Get health and damage based on the current level
+        int enemyHealth = enemyHealthPerLevel[currentLevel - 1];
+        int enemyDamage = enemyDamagePerLevel[currentLevel - 1];
+
+        // Spawn a new enemy based on the type
         Vector3 enemySpawnPosition = enemySpawnPoint.position; 
         enemy = Instantiate(enemyPrefab, enemySpawnPosition, Quaternion.identity).GetComponent<Enemy>();
-        enemy.InitializeCharacter("New Enemy", scaledHealth, scaledDamage, CharacterType.Enemy, enemySpawnPoint);
+        enemy.InitializeCharacter("Enemy", enemyHealth, enemyDamage, CharacterType.Enemy, enemySpawnPoint);
+        enemy.InitializeEnemy(enemyType); // Initialize enemy based on type
 
         allCharacters.Add(enemy); // Add Enemy to available targets
         Enemies.Add(enemy); // Add Enemy to available targets
+
 
         // Optionally: Reset player status effects, health, or block here
         foreach (Duck duck in DuckParty)
@@ -793,5 +824,97 @@ public class GameController : MonoBehaviour
 
         // Set the UIContainer's position to the new position
         UIContainer.transform.position = nextPosition;
+    }
+
+    public void RestartGame()
+    {
+        StartCoroutine(IE_RestartGame());
+    }
+
+    public IEnumerator IE_RestartGame()
+    {
+        Destroy(enemy.gameObject); 
+
+        // Step 1: Clear all characters and enemies
+        foreach (var character in allCharacters)
+        {
+            Destroy(character.gameObject); // Destroy each character's GameObject
+        }
+        // Step 1: Clear all characters and enemies
+        foreach (var character in Enemies)
+        {
+            Destroy(character.gameObject); // Destroy each character's GameObject
+        }
+
+
+        allCharacters.Clear();  // Clear the list of all characters
+        DuckParty.Clear();      // Clear the list of ducks (allies)
+        Enemies.Clear();        // Clear the list of enemies
+
+        enemy       = null;
+        rogueDuck   = null;
+        wizardDuck  = null;
+        knightDuck  = null;
+
+        // yield return new WaitForSeconds(2f);
+
+        // Step 2: Reset the camera to its original position (assuming the camera starts at zero)
+        CameraController.instance.transform.position    = new Vector3(0, 0, -500);
+        UIContainer.transform.position                  = new Vector3(0, 0, 0);
+        ducksParent.transform.position                  = new Vector3(0, 0, 0);
+
+        // Step 3: Clear background tiles
+        foreach (var tile in backgroundTiles)
+        {
+            Destroy(tile.gameObject); // Destroy each tile GameObject
+        }
+        backgroundTiles.Clear();  // Clear the list of background tiles
+
+        // Step 8: Reset mana, level, and UI
+        currentMana = baseMana;
+        currentLevel = 1;
+        UpdateUI();  // Update UI elements like mana, level, draw pile, etc.
+
+
+        // Step 4: Reset the current room index
+        currentRoomIndex = 0;
+
+  
+
+        // Step 6: Generate the initial background tiles again
+        GenerateBackgroundTiles();
+
+        // Step 7: Reset the card controller (new function you'll add)
+        yield return new WaitForSeconds(0.1f);
+
+        CardController.instance.ResetCards(); // Resets the deck, draw pile, discard pile, etc.
+
+        // Step 9: Reset state machine back to the game start state
+        stateMachine.ChangeState(gameStartState);
+
+        // Step 10: Hide any game over or other screens
+        if (gameOverScreen != null)
+        {
+            gameOverScreen.SetActive(false); // Hide game-over screen
+        }
+      // Step 5: Reinitialize characters
+        InitializeCharacters(); // Recreate the ducks and enemies with initial values
+
+        enemy.transform.position = enemySpawnPoint.transform.position;
+        Debug.Log("Game restarted successfully.");
+    }
+
+    public void DisplayEndScreen()
+    {
+        // Assume you have an end screen GameObject in the scene, assigned in the inspector
+        if (gameWinScreen != null)
+        {
+            gameWinScreen.SetActive(true);  // Show the end screen logo
+        }
+
+        // Optionally, freeze any further game actions or transitions
+        DisableGameActions();  // This disables buttons and input if needed
+
+        Debug.Log("Game Over: You have defeated the final boss!");
     }
 }
