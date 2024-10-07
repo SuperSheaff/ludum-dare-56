@@ -27,6 +27,8 @@ public class Character : MonoBehaviour
 
     // Particle systems for block and health effects
     public ParticleSystem blockParticle;
+    public ParticleSystem missParticle;
+    public ParticleSystem healParticle;
     public ParticleSystem healthParticle;
     public ParticleSystem deathParticle;
 
@@ -91,6 +93,8 @@ public class Character : MonoBehaviour
     // Method to gain block
     public void GainBlock(int amount)
     {
+        SoundManager.instance.PlaySound("GainBlock", this.transform, true);
+
         block += amount;
         Debug.Log($"{characterName} gained {amount} block. Current block: {block}");
 
@@ -107,6 +111,10 @@ public class Character : MonoBehaviour
     // Method to heal the character
     public void Heal(int amount)
     {
+
+        SoundManager.instance.PlaySound("Heal", this.transform, true);
+        healParticle.Play();
+
         currentHealth += amount;
         currentHealth = Mathf.Min(currentHealth, maxHealth); // Ensure health doesn't exceed maxHealth
 
@@ -124,6 +132,9 @@ public class Character : MonoBehaviour
         // Check for evade
         if (TryEvade())
         {
+            SoundManager.instance.PlaySound("NearMiss", this.transform, true);
+            missParticle.Play();
+
             Debug.Log($"{characterName} evaded the attack!");
             return; // No damage taken
         }
@@ -287,6 +298,7 @@ public class Character : MonoBehaviour
             marker.GetComponent<Marker>().SetEnabled(false);
             marker.GetComponent<Marker>().SetHover(true);
             markerRenderer.color = hoverMarkerColor; // Change color on hover
+            SoundManager.instance.PlaySound("ButtonHover", this.transform, true);
         }
     }
 
@@ -306,6 +318,7 @@ public class Character : MonoBehaviour
         if (markerIsActive)
         {
             GameController.instance.OnTargetChosen(this.gameObject); // Notify GameController that this target was chosen
+            SoundManager.instance.PlaySound("CharacterSelect", this.transform, true);
         }
     }
 
@@ -377,7 +390,11 @@ public class Character : MonoBehaviour
 
     public IEnumerator DamageAnimation()
     {
+        
+        SoundManager.instance.PlaySound("Hurt", this.transform, true);
+
         yield return new WaitForSeconds(0.1f);
+
 
         Vector3 targetPosition;
 
@@ -436,10 +453,23 @@ public class Character : MonoBehaviour
     {
         Debug.Log(characterName + " has died!");
 
+        SoundManager.instance.PlaySound("RetroDeath", this.transform, true);
+
         // Step 1: Shake the character
         yield return StartCoroutine(ShakeCharacter(0.6f));  // Shake for 0.6 seconds
 
+        if (characterType != CharacterType.Enemy)
+        {
+            yield return new WaitForSeconds(0.3f);
+            SoundManager.instance.PlaySound("Quack1", this.transform, true);
+            yield return new WaitForSeconds(0.6f);
+        }
+
+        SoundManager.instance.PlaySound("RetroExplosion", this.transform, true);
+
         yield return new WaitForSeconds(0.05f);
+
+
 
         // Step 2: Play death particle effect (if assigned)
         if (deathParticle != null)

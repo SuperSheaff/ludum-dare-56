@@ -625,6 +625,7 @@ GameObject:
   - component: {fileID: 449991139}
   - component: {fileID: 449991138}
   - component: {fileID: 449991140}
+  - component: {fileID: 449991141}
   m_Layer: 0
   m_Name: CameraController
   m_TagString: Untagged
@@ -700,6 +701,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraMoveSpeed: 25
+--- !u!114 &449991141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 449991137}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034816a71935f8a44ba98032cc54e295, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sensitivity: 20
+  maxOffset: 1.6
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -2367,6 +2382,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1729852345}
+  - component: {fileID: 1729852346}
   m_Layer: 0
   m_Name: SoundManager
   m_TagString: Untagged
@@ -2389,6 +2405,111 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1729852346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1729852344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a320a81b672ca534081353558c1181d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameSounds:
+  - name: CardHover
+    clip: {fileID: 8300000, guid: e254335bd5bf61a4f97c8e8a7b5e9213, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 1
+    spatialBlend: 0
+  - name: CardDraw
+    clip: {fileID: 8300000, guid: 50369ec4b8996894a87672b2ff27fee9, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 1
+    spatialBlend: 0
+  - name: Hurt
+    clip: {fileID: 8300000, guid: da9fc24d158e724478e28906db7b5f6e, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 1
+    spatialBlend: 0
+  - name: RetroExplosion
+    clip: {fileID: 8300000, guid: f8baad18d30ef834e9c0cce5527a2f9f, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 1
+    spatialBlend: 0
+  - name: RetroDeath
+    clip: {fileID: 8300000, guid: a45bc929c295a954abf8b163ebce083f, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 1
+    spatialBlend: 0
+  - name: Quack1
+    clip: {fileID: 8300000, guid: a5f2d3811ad50f543945668cdac7aef9, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 1
+    spatialBlend: 0
+  - name: ButtonHover
+    clip: {fileID: 8300000, guid: a7a4178cce994a14f957453f0f7dd78d, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 1.25
+    spatialBlend: 0
+  - name: ButtonSelect
+    clip: {fileID: 8300000, guid: a7a4178cce994a14f957453f0f7dd78d, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 0.75
+    spatialBlend: 0
+  - name: CardSelect
+    clip: {fileID: 8300000, guid: f620a1101e81fea4fb2118b493818fc8, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 0.75
+    spatialBlend: 0
+  - name: CharacterSelect
+    clip: {fileID: 8300000, guid: 2a0c41208a2e25849b1986f7ce0bcb72, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 0.75
+    spatialBlend: 0
+  - name: NearMiss
+    clip: {fileID: 8300000, guid: 0da6b03bdc5feb24e998b8cd148ce776, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 1
+    spatialBlend: 0
+  - name: GainBlock
+    clip: {fileID: 8300000, guid: 5872043f5bec3144c8dba49357dd9795, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 1
+    spatialBlend: 0
+  - name: Heal
+    clip: {fileID: 8300000, guid: 143a5403d9aed414f940bdce1692397f, type: 3}
+    loop: 0
+    source: {fileID: 0}
+    volume: 1
+    pitch: 1
+    spatialBlend: 0
+  soundFXObject: {fileID: 5727584418302476116, guid: 098da1a40e73fbc4eaffae1cf1997eca, type: 3}
 --- !u!1 &1815245039
 GameObject:
   m_ObjectHideFlags: 0
@@ -2866,13 +2987,25 @@ MonoBehaviour:
   m_GameObject: {fileID: 1866849625}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de048455875e1384d887759c18819970, type: 3}
+  m_Script: {fileID: 11500000, guid: b165f3d217eae0d499d9e23ea526b566, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteRenderer: {fileID: 1866849626}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  hoverColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  clickColor: {r: 0, g: 1, b: 0, a: 1}
+  onClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1196850513}
+        m_TargetAssemblyTypeName: GameController, Assembly-CSharp
+        m_MethodName: EndPlayerTurn
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  hoverSprite: {fileID: 21300000, guid: 590b610cb5861954386a68c42c3abfb9, type: 3}
 --- !u!1 &1898197871
 GameObject:
   m_ObjectHideFlags: 0
@@ -3076,37 +3209,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2019250286
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2019250287}
-  m_Layer: 0
-  m_Name: CameraController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2019250287
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2019250286}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2114670171
 GameObject:
   m_ObjectHideFlags: 0
@@ -3147,7 +3249,6 @@ SceneRoots:
   - {fileID: 1196850512}
   - {fileID: 449991139}
   - {fileID: 1966972744}
-  - {fileID: 2019250287}
   - {fileID: 1729852345}
   - {fileID: 1348786164}
   - {fileID: 557076032}
