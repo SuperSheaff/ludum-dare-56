@@ -42,6 +42,10 @@ public class CardDisplay : MonoBehaviour
     public Sprite neutralAttackCardSprite;
     public Sprite neutralBlockCardSprite;
 
+    public Sprite renewCardSprite;
+    public Sprite shivCardSprite;
+    public Sprite shieldbashCardSprite;
+
     // A reference to the game controller
     private GameController gameController;
     private CardController cardController;
@@ -103,6 +107,19 @@ public class CardDisplay : MonoBehaviour
             case "Neutral Block":
                 cardSpriteRenderer.sprite = neutralBlockCardSprite;
                 SetDescription($"Gain <color=#00FFFF>{cardData.primaryAmount}</color> block.");
+                break;
+
+            case "Shiv":
+                cardSpriteRenderer.sprite = shivCardSprite;
+                SetDescription($"Deal <color=#FF0000>{cardData.primaryAmount}</color> damage to a target enemy.");
+                break;
+            case "Renew":
+                cardSpriteRenderer.sprite = renewCardSprite;
+                SetDescription($"Gain <color=#FF0000>{cardData.primaryAmount}</color> mana.");
+                break;
+            case "Shield Bash":
+                cardSpriteRenderer.sprite = shieldbashCardSprite;
+                SetDescription($"Deal <color=#FF0000>{cardData.primaryAmount}</color> damage to a target enemy, and knight duck gains <color=#FFFF00>{cardData.secondaryAmount}</color> block.");
                 break;
         }
     }

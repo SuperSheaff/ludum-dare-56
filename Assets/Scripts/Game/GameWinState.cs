@@ -20,6 +20,8 @@ public class GameWinState : GameState
         gameController.MoveDucksToNextRoom();
 
         CameraController.instance.MoveCameraToNextTile(gameController.GenerateNextRoomLocation(), 1f, false);
+
+        gameController.startGameWinProcess();
     }
 
     public override void Update()

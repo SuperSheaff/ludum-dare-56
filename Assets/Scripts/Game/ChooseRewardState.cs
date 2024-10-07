@@ -21,6 +21,11 @@ public class ChooseRewardState : GameState
 
         CameraController.instance.MoveCameraToNextTile(gameController.GenerateNextRoomLocation(), 1f, true);
 
+        // Increase the level
+        gameController.currentLevel++;
+
+        gameController.GenerateBackgroundTiles();
+
     }
 
     public override void Update()

@@ -9,6 +9,7 @@ public class GameController : MonoBehaviour
     public GameSettings gameSettings;
 
     public StateMachine<GameController> stateMachine;
+    public GameIntroState gameIntroState;
     public GameStartState gameStartState;
     public PlayerTurnState playerTurnState;
     public EnemyTurnState enemyTurnState;
@@ -95,6 +96,16 @@ public class GameController : MonoBehaviour
     public List<int> enemyHealthPerLevel = new List<int>() { 10, 20, 30, 40 }; // Example values
     public List<int> enemyDamagePerLevel = new List<int>() { 5, 10, 15, 20 };  // Example values
 
+    public GameObject startButtonObject;
+    public GameObject introLogoObject;
+    public GameObject introScreen;
+    public TextMeshPro introAuthors;
+
+    public TextMeshPro introText1;
+    public TextMeshPro introText2;
+    public TextMeshPro introText3;
+
+    public bool CanStartGame = false;
 
     private void Awake()
     {
@@ -112,15 +123,7 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
-        InitializeCharacters();
         InitializeStateMachine();
-        GenerateBackgroundTiles();
-
-        // Initialize the deck in CardController
-        CardController.instance.InitializeDeck();
-
-        // Shuffle the deck and fill the draw pile
-        CardController.instance.ShuffleDeckIntoDrawPile();
     }
 
     private void Update()
@@ -129,12 +132,15 @@ public class GameController : MonoBehaviour
 
         UpdateUI();
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (CanStartGame)
         {
-            // Simulate the enemy attacking the rogue duck for testing purposes
-            // rogueDuck.TakeDamage(10);
+            // Check if the left mouse button is clicked (0 is the left button, 1 is the right button, 2 is the middle button)
+            if (Input.GetMouseButtonDown(0))
+            {
+                StartIntroThirdPart(); // Call your StartGame function when the mouse button is clicked
+                CanStartGame = false;
+            }
         }
-        
     }
 
     private void FixedUpdate()
@@ -146,13 +152,14 @@ public class GameController : MonoBehaviour
     {
         stateMachine        = new StateMachine<GameController>(true);
 
+        gameIntroState      = new GameIntroState(this);
         gameStartState      = new GameStartState(this);
         playerTurnState     = new PlayerTurnState(this);
         enemyTurnState      = new EnemyTurnState(this);
         chooseRewardState   = new ChooseRewardState(this);
         gameWinState        = new GameWinState(this);
 
-        stateMachine.Initialize(gameStartState);
+        stateMachine.Initialize(gameIntroState);
     }
 
     private void InitializeCharacters()
@@ -183,7 +190,7 @@ public class GameController : MonoBehaviour
         DuckParty.Add(wizardDuck); // Add Wizard Duck to available targets
 
         // Initialize enemy with health and attack values
-        enemy.InitializeCharacter("Enemy", enemyHealthPerLevel[0], enemyHealthPerLevel[1], CharacterType.Enemy, enemySpawnPoint);
+        enemy.InitializeCharacter("Enemy", enemyHealthPerLevel[0], enemyDamagePerLevel[0], CharacterType.Enemy, enemySpawnPoint);
         enemy.InitializeEnemy(EnemyType.Peasant);
         allCharacters.Add(enemy); // Add Enemy to available targets
         Enemies.Add(enemy); // Add Enemy to available targets
@@ -367,7 +374,7 @@ public class GameController : MonoBehaviour
         unselectButton.SetActive(false);
         endTurnButton.SetActive(true);
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.2f);
 
 
         // Change color based on card type
@@ -380,7 +387,7 @@ public class GameController : MonoBehaviour
                 {
                     if (character.IsAlly()) // Ensure it's a duck
                     {
-                        character.ApplyEvadeChance(0.5f, 1); // 50% evade chance for 1 turn
+                        character.ApplyEvadeChance(0.5f, playedCard.primaryAmount); // 50% evade chance for 1 turn
                     }
                 }
                 yield return new WaitForSeconds(0.3f);
@@ -415,6 +422,37 @@ public class GameController : MonoBehaviour
                 yield return new WaitForSeconds(0.3f);
                 PlayCharacterAnimation(CharacterType.Wizard, "attack");
                 target.TakeDamage(playedCard.primaryAmount);
+                break;
+
+            // Apply damage for primaryAmount to target
+            case "Shiv":
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
+                PlayCharacterAnimation(CharacterType.Rogue, "attack");
+                target.TakeDamage(playedCard.primaryAmount);
+                break;
+
+            // Apply damage for primaryAmount to target
+            case "Renew":
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
+                PlayCharacterAnimation(CharacterType.Wizard, "attack");
+                currentMana++;
+                break;
+
+            // Apply damage for primaryAmount to target
+            case "Shield Bash":
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
+                PlayCharacterAnimation(CharacterType.Knight, "attack");
+                target.TakeDamage(playedCard.primaryAmount);
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
+                knightDuck.GainBlock(playedCard.secondaryAmount);
                 break;
 
             // Set the enemy's intent to the Knight Duck
@@ -634,7 +672,7 @@ public class GameController : MonoBehaviour
         // Disable the class-specific cards in the hand
         if (characterType == CharacterType.Enemy)
         {
-            if (currentLevel > 8)
+            if (currentLevel < 8)
             {
                 // Change state
                 stateMachine.ChangeState(new ChooseRewardState(this));
@@ -653,16 +691,7 @@ public class GameController : MonoBehaviour
     // Method to trigger the game-over screen
     public void TriggerGameOver()
     {
-        // Show the game-over screen (if assigned in the inspector)
-        if (gameOverScreen != null)
-        {
-            gameOverScreen.SetActive(true);
-        }
-
-        // Log the game-over event
-        Debug.Log("Game Over!");
-
-        // Disable any further gameplay actions (if needed)
+        startGameOverProcess();
         DisableGameActions();
     }
 
@@ -743,10 +772,6 @@ public class GameController : MonoBehaviour
 
     public IEnumerator IE_PrepareNextLevel()
     {
-        // Increase the level
-        currentLevel++;
-
-        GenerateBackgroundTiles();
 
         // Clear the previous enemy
         if (enemy != null)
@@ -879,8 +904,6 @@ public class GameController : MonoBehaviour
         // Step 4: Reset the current room index
         currentRoomIndex = 0;
 
-  
-
         // Step 6: Generate the initial background tiles again
         GenerateBackgroundTiles();
 
@@ -896,6 +919,7 @@ public class GameController : MonoBehaviour
         if (gameOverScreen != null)
         {
             gameOverScreen.SetActive(false); // Hide game-over screen
+            gameWinScreen.SetActive(false); // Hide game-over screen
         }
       // Step 5: Reinitialize characters
         InitializeCharacters(); // Recreate the ducks and enemies with initial values
@@ -904,17 +928,279 @@ public class GameController : MonoBehaviour
         Debug.Log("Game restarted successfully.");
     }
 
-    public void DisplayEndScreen()
+    public void startGameWinProcess()
     {
-        // Assume you have an end screen GameObject in the scene, assigned in the inspector
-        if (gameWinScreen != null)
+        SoundManager.instance.FadeOutSound("GameMusic", 1f);
+
+        CardController.instance.ClearAllCards();
+        StartCoroutine(gameWinProcess());
+    }
+
+    private IEnumerator gameWinProcess()
+    {
+        SoundManager.instance.PlaySound("GameWin", this.transform, false);
+        yield return new WaitForSeconds(3f);
+        StartCoroutine(SlideInObject(gameWinScreen, new Vector3(CameraController.instance.transform.position.x, CameraController.instance.transform.position.y, 50f), 1.6f, 1f));
+        yield return new WaitForSeconds(1f);
+        SoundManager.instance.PlaySound("Quack1", this.transform, false);
+    }
+
+    public void startGameOverProcess()
+    {
+        SoundManager.instance.FadeOutSound("GameMusic", 1f);
+        CardController.instance.ClearAllCards();
+        StartCoroutine(gameOverProcess());
+    }
+
+    private IEnumerator gameOverProcess()
+    {
+        yield return new WaitForSeconds(3f);
+        SoundManager.instance.PlaySound("GameOver", this.transform, false);
+        StartCoroutine(SlideInObject(gameOverScreen, UIContainer.transform.position, 1.6f, 1f));
+        yield return new WaitForSeconds(1f);
+        SoundManager.instance.PlaySound("Quack1", this.transform, false);
+    }
+
+
+    private IEnumerator SlideInObject(GameObject obj, Vector3 targetPosition, float overshootDistance, float duration)
+    {
+        // Move the object to a starting position above the screen
+        Vector3 startPosition = targetPosition + new Vector3(0, 50f, 0); // Well above the screen, adjust 1000f as needed
+        obj.transform.position = startPosition;
+        obj.SetActive(true); // Activate the object before the slide animation
+
+        float elapsedTime = 0f;
+        Vector3 overshootPosition = targetPosition - new Vector3(0, overshootDistance, 0); // Position slightly below the target
+
+        // Slide from above to the overshoot position
+        while (elapsedTime < duration)
         {
-            gameWinScreen.SetActive(true);  // Show the end screen logo
+            elapsedTime += Time.deltaTime;
+            obj.transform.position = Vector3.Lerp(startPosition, overshootPosition, elapsedTime / duration);
+            yield return null;
         }
 
-        // Optionally, freeze any further game actions or transitions
-        DisableGameActions();  // This disables buttons and input if needed
+        // Snap to overshoot position to ensure accuracy
+        obj.transform.position = overshootPosition;
 
-        Debug.Log("Game Over: You have defeated the final boss!");
+        // Bounce back to the final position (center) with a slight delay
+        elapsedTime = 0f;
+        while (elapsedTime < duration * 0.5f) // Bounce-back time is half of the slide duration
+        {
+            elapsedTime += Time.deltaTime;
+            obj.transform.position = Vector3.Lerp(overshootPosition, targetPosition, elapsedTime / (duration * 0.5f));
+            yield return null;
+        }
+
+        // Ensure it snaps exactly to the center position
+        obj.transform.position = targetPosition;
+    }
+
+
+    public void StartIntro()
+    {
+        StartCoroutine(IE_StartIntro());
+    }
+
+    private IEnumerator IE_StartIntro()
+    {
+        // Step 1: Start playing the music
+        SoundManager.instance.PlaySound("IntroMusic", this.transform);
+
+        // Step 2: Fade in the logo
+        yield return StartCoroutine(FadeInSprite(introLogoObject, 2f)); // 2 seconds to fade in
+
+        // Step 3: Wait for a short duration before showing the button
+        yield return new WaitForSeconds(1f); // Optional wait time before showing the button
+
+        // Step 4: Fade in the button
+        yield return StartCoroutine(FadeInText(introAuthors, 1f)); // 1 second to fade in the button
+        
+        // Step 3: Wait for a short duration before showing the button
+        yield return new WaitForSeconds(1f); // Optional wait time before showing the button
+
+        // Step 4: Fade in the button
+        yield return StartCoroutine(FadeInSprite(startButtonObject, 1f)); // 1 second to fade in the button
+    }
+
+    // Function to fade in a GameObject with a SpriteRenderer
+    private IEnumerator FadeInSprite(GameObject uiElement, float duration)
+    {
+        SpriteRenderer spriteRenderer = uiElement.GetComponent<SpriteRenderer>();
+
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("SpriteRenderer not found on " + uiElement.name);
+            yield break;
+        }
+
+        float elapsedTime = 0f;
+        Color initialColor = spriteRenderer.color;
+        initialColor.a = 0; // Start at 0 opacity
+        spriteRenderer.color = initialColor; // Set the starting color
+
+        uiElement.SetActive(true); // Ensure the UI element is active
+
+        // Gradually increase the alpha over the duration
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Clamp01(elapsedTime / duration);
+            spriteRenderer.color = new Color(initialColor.r, initialColor.g, initialColor.b, alpha);
+            yield return null;
+        }
+
+        // Ensure the final alpha is set to 1
+        spriteRenderer.color = new Color(initialColor.r, initialColor.g, initialColor.b, 1);
+    }
+
+    // Function to fade out a GameObject with a SpriteRenderer
+    private IEnumerator FadeOutSprite(GameObject uiElement, float duration)
+    {
+        SpriteRenderer spriteRenderer = uiElement.GetComponent<SpriteRenderer>();
+
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("SpriteRenderer not found on " + uiElement.name);
+            yield break;
+        }
+
+        float elapsedTime = 0f;
+        Color initialColor = spriteRenderer.color;
+        initialColor.a = 1; // Start at full opacity
+        spriteRenderer.color = initialColor; // Set the starting color
+
+        // Gradually decrease the alpha over the duration
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Clamp01(1 - (elapsedTime / duration)); // Alpha decreases from 1 to 0
+            spriteRenderer.color = new Color(initialColor.r, initialColor.g, initialColor.b, alpha);
+            yield return null;
+        }
+
+        // Ensure the final alpha is set to 0
+        spriteRenderer.color = new Color(initialColor.r, initialColor.g, initialColor.b, 0);
+
+        uiElement.SetActive(false); // Optionally deactivate the GameObject after fading out
+    }
+
+    public void StartIntroSecondPart()
+    {
+        StartCoroutine(IE_StartIntroSecondPart());
+    }
+
+    private IEnumerator IE_StartIntroSecondPart()
+    {
+        // Step 2: Fade in the logo
+        StartCoroutine(FadeOutSprite(introLogoObject, 1f)); // 2 seconds to fade in
+
+        StartCoroutine(FadeOutText(introAuthors, 1f)); // 1 second to fade in the button
+
+        // Step 4: Fade in the button
+        StartCoroutine(FadeOutSprite(startButtonObject, 1f)); // 1 second to fade in the button
+
+        // Step 3: Wait for a short duration before showing the button
+        yield return new WaitForSeconds(1f); // Optional wait time before showing the button
+
+        yield return StartCoroutine(FadeInText(introText1, 1f)); // 1 second to fade in the button
+
+        yield return new WaitForSeconds(1f); // Optional wait time before showing the button
+
+        yield return StartCoroutine(FadeInText(introText2, 1f)); // 1 second to fade in the button
+
+        yield return new WaitForSeconds(1f); // Optional wait time before showing the button
+
+        CanStartGame = true;
+
+        yield return StartCoroutine(FadeInText(introText3, 1f)); // 1 second to fade in the button
+    }
+
+
+    // Function to fade in a TextMeshPro object
+    private IEnumerator FadeInText(TextMeshPro textElement, float duration)
+    {
+        if (textElement == null)
+        {
+            Debug.LogError("TextMeshProUGUI not found!");
+            yield break;
+        }
+
+        float elapsedTime = 0f;
+        Color initialColor = textElement.color;
+        initialColor.a = 0; // Start at 0 opacity
+        textElement.color = initialColor; // Set the starting color
+
+        // Gradually increase the alpha over the duration
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Clamp01(elapsedTime / duration);
+            textElement.color = new Color(initialColor.r, initialColor.g, initialColor.b, alpha);
+            yield return null;
+        }
+
+        // Ensure the final alpha is set to 1
+        textElement.color = new Color(initialColor.r, initialColor.g, initialColor.b, 1);
+    }
+
+    // Function to fade out a TextMeshPro object
+    private IEnumerator FadeOutText(TextMeshPro textElement, float duration)
+    {
+        if (textElement == null)
+        {
+            Debug.LogError("TextMeshProUGUI not found!");
+            yield break;
+        }
+
+        float elapsedTime = 0f;
+        Color initialColor = textElement.color;
+        initialColor.a = 1; // Start at full opacity
+        textElement.color = initialColor; // Set the starting color
+
+        // Gradually decrease the alpha over the duration
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Clamp01(1 - (elapsedTime / duration)); // Alpha decreases from 1 to 0
+            textElement.color = new Color(initialColor.r, initialColor.g, initialColor.b, alpha);
+            yield return null;
+        }
+
+        // Ensure the final alpha is set to 0
+        textElement.color = new Color(initialColor.r, initialColor.g, initialColor.b, 0);
+    }
+
+
+    public void StartIntroThirdPart()
+    {
+        StartCoroutine(IE_StartIntroThirdPart());
+    }
+
+    private IEnumerator IE_StartIntroThirdPart()
+    {
+        // Step 1: Start playing the music
+        SoundManager.instance.FadeOutSound("IntroMusic", 1f);
+        // Step 3: Wait for a short duration before showing the button
+        yield return new WaitForSeconds(1f); // Optional wait time before showing the button
+        
+        InitializeCharacters();
+        GenerateBackgroundTiles();
+
+        StartCoroutine(FadeOutText(introText1, 1f)); // 1 second to fade in the button
+        StartCoroutine(FadeOutText(introText2, 1f)); // 1 second to fade in the button
+        StartCoroutine(FadeOutText(introText3, 1f)); // 1 second to fade in the button
+        yield return new WaitForSeconds(1f); // Optional wait time before showing the button
+        yield return StartCoroutine(FadeOutSprite(introScreen, 1f)); // 1 second to fade in the button
+
+
+        // Initialize the deck in CardController
+        CardController.instance.InitializeDeck();
+
+        // Shuffle the deck and fill the draw pile
+        CardController.instance.ShuffleDeckIntoDrawPile();
+
+        stateMachine.ChangeState(gameStartState);
     }
 }
+

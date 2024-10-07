@@ -43,16 +43,14 @@ public class CardController : MonoBehaviour
     // Function to initialize the deck with predefined cards
     public void InitializeDeck()
     {
-        deck.Add(new Card("Smoke Bomb",         CardType.Rogue,     TargetType.AllAllies,       1, 1, 0));
-        deck.Add(new Card("Poison",             CardType.Rogue,     TargetType.Enemy,           2, 2, 3));
-        deck.Add(new Card("Heal",               CardType.Wizard,    TargetType.AllAllies,       2, 4, 0));
-        deck.Add(new Card("Fireball",           CardType.Wizard,    TargetType.Enemy,           2, 4, 0));
-        deck.Add(new Card("Taunt",              CardType.Knight,    TargetType.Knight,          1, 1, 0));
-        deck.Add(new Card("Reckless",           CardType.Knight,    TargetType.Enemy,           3, 8, 4));
-        deck.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 2, 0));
-        deck.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 3, 0));
-        deck.Add(new Card("Neutral Block",      CardType.Neutral,   TargetType.AllAllies,       1, 5, 0));
-        deck.Add(new Card("Neutral Block",      CardType.Neutral,   TargetType.AllAllies,       1, 5, 0));
+        deck.Add(new Card("Fireball",        CardType.Wizard,    TargetType.Enemy,           2, 4, 0));
+        deck.Add(new Card("Reckless",        CardType.Knight,    TargetType.Enemy,           3, 7, 4));
+        deck.Add(new Card("Shiv",            CardType.Rogue,     TargetType.Enemy,           0, 1, 0));
+        deck.Add(new Card("Poison",          CardType.Rogue,     TargetType.Enemy,           2, 3, 3));
+        deck.Add(new Card("Neutral Attack",  CardType.Neutral,   TargetType.Enemy,           1, 2, 0));
+        deck.Add(new Card("Neutral Attack",  CardType.Neutral,   TargetType.Enemy,           1, 2, 0));
+        deck.Add(new Card("Neutral Block",   CardType.Neutral,   TargetType.AllAllies,       1, 3, 0));
+        deck.Add(new Card("Neutral Block",   CardType.Neutral,   TargetType.AllAllies,       1, 3, 0));
     }
 
     // Function to shuffle the deck and move the cards to the draw pile
@@ -370,32 +368,51 @@ public class CardController : MonoBehaviour
     public void InitializeCardLibrary()
     {
         // Initialize the card library with all unique cards
-        cardLibrary.Add(new Card("Smoke Bomb",         CardType.Rogue,     TargetType.AllAllies,       1, 1, 0));
-        cardLibrary.Add(new Card("Poison",             CardType.Rogue,     TargetType.Enemy,           2, 2, 3));
-        cardLibrary.Add(new Card("Heal",               CardType.Wizard,    TargetType.AllAllies,       2, 4, 0));
-        cardLibrary.Add(new Card("Fireball",           CardType.Wizard,    TargetType.Enemy,           2, 4, 0));
-        cardLibrary.Add(new Card("Taunt",              CardType.Knight,    TargetType.Knight,          1, 1, 0));
-        cardLibrary.Add(new Card("Reckless",           CardType.Knight,    TargetType.Enemy,           3, 8, 4));
-        cardLibrary.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 2, 0));
-        cardLibrary.Add(new Card("Neutral Block",      CardType.Neutral,   TargetType.AllAllies,       1, 3, 0));
+        cardLibrary.Add(new Card("Smoke Bomb",      CardType.Rogue,     TargetType.AllAllies,       1, 2, 0));
+        cardLibrary.Add(new Card("Poison",          CardType.Rogue,     TargetType.Enemy,           2, 3, 3));
+        cardLibrary.Add(new Card("Heal",            CardType.Wizard,    TargetType.AllAllies,       2, 4, 0));
+        cardLibrary.Add(new Card("Fireball",        CardType.Wizard,    TargetType.Enemy,           2, 4, 0));
+        cardLibrary.Add(new Card("Taunt",           CardType.Knight,    TargetType.Knight,          1, 1, 0));
+        cardLibrary.Add(new Card("Reckless",        CardType.Knight,    TargetType.Enemy,           3, 7, 4));
+        cardLibrary.Add(new Card("Neutral Attack",  CardType.Neutral,   TargetType.Enemy,           1, 2, 0));
+        cardLibrary.Add(new Card("Neutral Block",   CardType.Neutral,   TargetType.AllAllies,       1, 3, 0));
+        cardLibrary.Add(new Card("Shiv",            CardType.Rogue,     TargetType.Enemy,           0, 1, 0));
+        cardLibrary.Add(new Card("Renew",           CardType.Wizard,   TargetType.AllAllies,        0, 1, 0));
+        cardLibrary.Add(new Card("Shield Bash",     CardType.Knight,    TargetType.Enemy,           2, 4, 4));
         // Add more unique cards as needed
     }
+
 
     public void GenerateRewardCards()
     {
         GameController.instance.MoveUIToNextLevel();
-        
+
         // Ensure the card library is initialized
         if (cardLibrary == null || cardLibrary.Count == 0)
         {
             InitializeCardLibrary();
         }
 
+        // Create a temporary list of available cards (so we don't modify the original library)
+        List<Card> availableCards = new List<Card>(cardLibrary);
+
         for (int i = 0; i < 3; i++)
         {
-            // Randomly pick a card from the card library
-            Card randomCard = cardLibrary[Random.Range(0, cardLibrary.Count)];
+            if (availableCards.Count == 0)
+            {
+                Debug.LogWarning("No more unique cards to choose from.");
+                break; // Stop if no more unique cards are available
+            }
+
+            // Randomly pick a card from the available cards list
+            int randomIndex = Random.Range(0, availableCards.Count);
+            Card randomCard = availableCards[randomIndex];
+
+            // Add the chosen card to the reward list
             rewardCards.Add(randomCard);
+
+            // Remove the chosen card from the available cards to avoid duplicates
+            availableCards.RemoveAt(randomIndex);
         }
 
         // Start the staggered animation for all reward cards

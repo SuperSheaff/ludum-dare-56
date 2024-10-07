@@ -33,6 +33,8 @@ public class Character : MonoBehaviour
     public ParticleSystem deathParticle;
 
     public TextMeshPro healthText; // Reference to the TextMeshPro component for displaying health
+    public TextMeshPro poisonText; // Reference to the TextMeshPro component for displaying health
+    public GameObject poisonMarker; // Reference to the block marker object (blockText)
     public TextMeshPro blockText; // Reference to the TextMeshPro component for displaying health
     public GameObject blockMarker; // Reference to the block marker object (blockText)
     public GameObject healthMarker; // Reference to the block marker object (blockText)
@@ -187,6 +189,8 @@ public class Character : MonoBehaviour
         poisonDamage = damagePerTurn;
         poisonTurnsRemaining += turns;
         Debug.Log($"{characterName} has been poisoned! Takes {damagePerTurn} damage for {turns} turns.");
+
+        UpdateStatText();
     }
 
     // Method to check poison damage at the start of each turn
@@ -197,6 +201,8 @@ public class Character : MonoBehaviour
             TakeDamage(poisonDamage);
             poisonTurnsRemaining--;
             Debug.Log($"{characterName} took {poisonDamage} poison damage. {poisonTurnsRemaining} turns remaining.");
+
+            UpdateStatText();
         }
     }
 
@@ -270,6 +276,16 @@ public class Character : MonoBehaviour
         else
         {
             blockMarker.SetActive(false); // Hide the block marker when block is 0
+        }
+
+        if (poisonTurnsRemaining > 0)
+        {
+            poisonText.text = poisonTurnsRemaining.ToString();
+            poisonMarker.SetActive(true); // Show the block marker
+        }
+        else
+        {
+            poisonMarker.SetActive(false); // Hide the block marker when block is 0
         }
     }
 
@@ -489,6 +505,10 @@ public class Character : MonoBehaviour
         if (blockMarker != null)
         {
             blockMarker.SetActive(false);
+        }
+        if (poisonMarker != null)
+        {
+            poisonMarker.SetActive(false);
         }
 
         // Show death sprite

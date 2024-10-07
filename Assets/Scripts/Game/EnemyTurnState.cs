@@ -15,11 +15,14 @@ public class EnemyTurnState : GameState
             {
                 character.StartTurn();
                 character.HideIntentMarker();
+
+                if (character.currentHealth > 0)
+                {
+                    // Attack the duck that was chosen as the target during the player's turn
+                    AttackChosenTarget();
+                }
             }
         }
-
-        // Attack the duck that was chosen as the target during the player's turn
-        AttackChosenTarget();
     }
 
     private void AttackChosenTarget()

@@ -2,18 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Manager class to handle playing and stopping game sounds
 public class SoundManager : MonoBehaviour
 {
     public static SoundManager instance; // Singleton instance of the SoundManager
-
     public GameSound[] gameSounds; // Array of game sounds
 
     [SerializeField] private AudioSource soundFXObject; // Audio source prefab for sound effects
 
     private Dictionary<string, List<AudioSource>> activeSounds; // Dictionary to track active sounds
 
-    // Initialize the SoundManager instance and set up the audio sources
     private void Awake()
     {
         if (instance == null)
@@ -56,7 +53,6 @@ public class SoundManager : MonoBehaviour
 
         Debug.Log("Playing Sound: " + name);
 
-        // If allowMultiple is false, stop any existing instance of the sound before playing it again
         if (!allowMultiple && gs.source != null && gs.source.isPlaying)
         {
             gs.source.Stop();
@@ -70,10 +66,9 @@ public class SoundManager : MonoBehaviour
             audioSource.volume = gs.volume;
             audioSource.pitch = gs.pitch;
             audioSource.loop = gs.loop;
-            audioSource.spatialBlend = gs.spatialBlend; // 3D sound settings
+            audioSource.spatialBlend = gs.spatialBlend;
             audioSource.Play();
 
-            // Destroy the AudioSource GameObject after the sound finishes, if not looping
             if (!gs.loop)
             {
                 Destroy(audioSource.gameObject, gs.clip.length);
@@ -87,12 +82,47 @@ public class SoundManager : MonoBehaviour
         }
         else
         {
-            // Play non-spatial/2D sound (if gs.source is assigned)
             if (gs.source != null)
             {
                 gs.source.Play();
             }
         }
+    }
+
+    // Fade out a sound by name
+    public void FadeOutSound(string name, float fadeDuration)
+    {
+        if (!activeSounds.ContainsKey(name))
+        {
+            Debug.LogWarning("Sound: " + name + " not found!");
+            return;
+        }
+
+        Debug.Log("Fading out Sound: " + name);
+
+        // Fade out all instances of the sound
+        foreach (AudioSource source in activeSounds[name])
+        {
+            if (source != null && source.isPlaying)
+            {
+                StartCoroutine(FadeOutCoroutine(source, fadeDuration));
+            }
+        }
+    }
+
+    // Coroutine to fade out the volume of an AudioSource
+    private IEnumerator FadeOutCoroutine(AudioSource audioSource, float fadeDuration)
+    {
+        float startVolume = audioSource.volume;
+
+        while (audioSource.volume > 0)
+        {
+            audioSource.volume -= startVolume * Time.deltaTime / fadeDuration;
+            yield return null;
+        }
+
+        audioSource.Stop(); // Stop the sound after fade-out
+        audioSource.volume = startVolume; // Reset the volume for future use
     }
 
     // Stop a sound by name
@@ -107,15 +137,12 @@ public class SoundManager : MonoBehaviour
         Debug.Log("Stopping Sound: " + name);
 
         // Stop all instances of the sound
-        bool soundWasPlaying = false;
         for (int i = activeSounds[name].Count - 1; i >= 0; i--)
         {
             AudioSource source = activeSounds[name][i];
             if (source != null && source.isPlaying)
             {
                 source.Stop();
-                soundWasPlaying = true;
-                // Debug.Log("Stopped AudioSource playing: " + name);
             }
 
             // Remove destroyed or inactive sources from the list
@@ -124,17 +151,13 @@ public class SoundManager : MonoBehaviour
                 activeSounds[name].RemoveAt(i);
             }
         }
-
-        if (!soundWasPlaying)
-        {
-            // Debug.LogWarning("Sound was not playing: " + name);
-        }
     }
 
-    // Play a random sound from an array of sound names, optionally at a specific transform position
+    // Play a random sound from an array of sound names
     public void PlayRandomSound(string[] names, Transform spawnTransform = null)
     {
         int rand = Random.Range(0, names.Length);
         PlaySound(names[rand], spawnTransform);
     }
 }
+

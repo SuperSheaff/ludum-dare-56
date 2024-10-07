@@ -6,6 +6,7 @@ public class GameStartState : GameState
 
     public override void Enter()
     {
+        SoundManager.instance.PlaySound("GameMusic", gameController.transform);
     }
 
     public override void Update()
