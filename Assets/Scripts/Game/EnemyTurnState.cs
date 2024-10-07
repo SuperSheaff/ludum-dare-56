@@ -26,6 +26,8 @@ public class EnemyTurnState : GameState
     {
         Duck targetDuck = gameController.enemy.GetTarget(); // Get the enemy's chosen target
 
+        gameController.PlayCharacterAnimation(CharacterType.Enemy, "attack");
+
         // If the target is still alive, attack
         if (targetDuck != null && targetDuck.currentHealth > 0)
         {

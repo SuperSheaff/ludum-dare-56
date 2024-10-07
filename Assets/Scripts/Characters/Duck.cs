@@ -65,4 +65,9 @@ public class Duck : Character
 
         CardController.instance.EnableCardsByType(this.characterType);
     }
+
+    public void SetPositionAtHome()
+    {
+        transform.position = homePosition.position;
+    }
 }
