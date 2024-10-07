@@ -64,6 +64,7 @@ public class GameController : MonoBehaviour
     public int baseMana         = 5;
     public int currentMana      = 5;    // Example mana value, this can be dynamic
     public TextMeshPro manaText;        // Reference to the TextMeshPro component for displaying health
+    public GameObject chooseNewCardText;        // Reference to the TextMeshPro component for displaying health
 
     public GameObject TilesParent; // Parent for background tiles
     public GameObject dungeonTilePrefab;
@@ -158,23 +159,23 @@ public class GameController : MonoBehaviour
         enemy = Instantiate(enemyPrefab, enemySpawnPoint.position, Quaternion.identity).GetComponent<Enemy>();
 
         // Initialize ducks with health, attack values, and types
-        rogueDuck.InitializeCharacter("Rogue Duck", 10, 10, CharacterType.Rogue);
+        rogueDuck.InitializeCharacter("Rogue Duck", 10, 10, CharacterType.Rogue, rogueSpawnPoint);
         rogueDuck.InitializeDuck(DuckType.Rogue);
         allCharacters.Add(rogueDuck); // Add Rogue Duck to available targets
         DuckParty.Add(rogueDuck); // Add Rogue Duck to available targets
 
-        knightDuck.InitializeCharacter("Knight Duck", 15, 8, CharacterType.Knight);
+        knightDuck.InitializeCharacter("Knight Duck", 15, 8, CharacterType.Knight, knightSpawnPoint);
         knightDuck.InitializeDuck(DuckType.Knight);
         allCharacters.Add(knightDuck); // Add Knight Duck to available targets
         DuckParty.Add(knightDuck); // Add Knight Duck to available targets
 
-        wizardDuck.InitializeCharacter("Wizard Duck", 8, 12, CharacterType.Wizard);
+        wizardDuck.InitializeCharacter("Wizard Duck", 8, 12, CharacterType.Wizard, wizardSpawnPoint);
         wizardDuck.InitializeDuck(DuckType.Wizard);
         allCharacters.Add(wizardDuck); // Add Wizard Duck to available targets
         DuckParty.Add(wizardDuck); // Add Wizard Duck to available targets
 
         // Initialize enemy with health and attack values
-        enemy.InitializeCharacter("Enemy", baseEnemyHealth, baseEnemyDamage, CharacterType.Enemy);
+        enemy.InitializeCharacter("Enemy", baseEnemyHealth, baseEnemyDamage, CharacterType.Enemy, enemySpawnPoint);
         allCharacters.Add(enemy); // Add Enemy to available targets
         Enemies.Add(enemy); // Add Enemy to available targets
     }
@@ -335,11 +336,19 @@ public class GameController : MonoBehaviour
     }
 
     // Apply the card's effect to the target
-    private void PlayCard(Character target, Card playedCard)
+    public void PlayCard(Character target, Card playedCard)
+    {
+        StartCoroutine(IE_PlayCard(target, playedCard));
+    }
+
+    // Apply the card's effect to the target
+    private IEnumerator IE_PlayCard(Character target, Card playedCard)
     {
 
         // Hide all markers after selection
         HideAllMarkers();
+
+
 
         // Move the card data to the discard pile
         CardController.instance.DiscardCard(playedCard);
@@ -348,6 +357,9 @@ public class GameController : MonoBehaviour
         chooseTargetText.gameObject.SetActive(false);
         unselectButton.SetActive(false);
         endTurnButton.SetActive(true);
+
+        yield return new WaitForSeconds(0.5f);
+
 
         // Change color based on card type
         switch (playedCard.cardName)
@@ -362,25 +374,31 @@ public class GameController : MonoBehaviour
                         character.ApplyEvadeChance(0.5f, 1); // 50% evade chance for 1 turn
                     }
                 }
+                PlayCharacterAnimation(CharacterType.Rogue, "attack");
                 break;
 
             // Apply poison for primaryAmount damage over secondaryAmount turns
             case "Poison":
+                PlayCharacterAnimation(CharacterType.Rogue, "attack");
                 target.ApplyPoison(playedCard.primaryAmount, playedCard.secondaryAmount); 
+
                 break;
 
             // Apply heal for primaryAmount to target
             case "Heal":
+                PlayCharacterAnimation(CharacterType.Wizard, "attack");
                 target.Heal(playedCard.primaryAmount);
                 break;
 
             // Apply damage for primaryAmount to target
             case "Fireball":
+                PlayCharacterAnimation(CharacterType.Wizard, "attack");
                 target.TakeDamage(playedCard.primaryAmount);
                 break;
 
             // Set the enemy's intent to the Knight Duck
             case "Taunt":
+                PlayCharacterAnimation(CharacterType.Knight, "attack");
                 foreach (Character character in allCharacters)
                 {
                     if (character.IsEnemy())
@@ -397,8 +415,9 @@ public class GameController : MonoBehaviour
 
             // Deal primary damage to the target and Knight Duck takes secondary damage
             case "Reckless":
+                PlayCharacterAnimation(CharacterType.Knight, "attack");
+                yield return new WaitForSeconds(0.3f);
                 target.TakeDamage(playedCard.primaryAmount);
-
                 if (knightDuck != null)
                 {
                     knightDuck.TakeDamage(playedCard.secondaryAmount);
@@ -428,6 +447,7 @@ public class GameController : MonoBehaviour
 
             // Apply damage for primaryAmount to target
             case "Neutral Attack":
+                PlayCharacterAnimation(CharacterType.Knight, "attack");
                 target.TakeDamage(playedCard.primaryAmount);
                 break;
 
@@ -446,6 +466,88 @@ public class GameController : MonoBehaviour
 
         // Update the hand positions
         CardController.instance.UpdateHandCardPositions();
+
+        yield return new WaitForSeconds(0.5f);
+    }
+
+    public void PlayCharacterAnimation(CharacterType characterType, string animationName, bool random = false)
+    {
+        Character targetCharacter = null;
+
+        if (random)
+        {
+            // Create a list of alive ducks
+            List<Character> aliveDucks = new List<Character>();
+
+            if (rogueDuck.currentHealth > 0)
+            {
+                aliveDucks.Add(rogueDuck);
+            }
+            if (knightDuck.currentHealth > 0)
+            {
+                aliveDucks.Add(knightDuck);
+            }
+            if (wizardDuck.currentHealth > 0)
+            {
+                aliveDucks.Add(wizardDuck);
+            }
+
+            // If there are any alive ducks, choose one randomly
+            if (aliveDucks.Count > 0)
+            {
+                targetCharacter = aliveDucks[Random.Range(0, aliveDucks.Count)];
+                characterType = targetCharacter.characterType;
+            }
+            else
+            {
+                Debug.LogError("No alive ducks found!");
+            }
+        }
+
+
+        // Find the correct character based on character type
+        switch (characterType)
+        {
+            case CharacterType.Rogue:
+                targetCharacter = rogueDuck;
+                break;
+            case CharacterType.Knight:
+                targetCharacter = knightDuck;
+                break;
+            case CharacterType.Wizard:
+                targetCharacter = wizardDuck;
+                break;
+            case CharacterType.Enemy:
+                targetCharacter = enemy;
+                break;
+            default:
+                Debug.LogError("Invalid character type specified!");
+                return;
+        }
+
+        if (targetCharacter != null)
+        {
+            // Use a switch statement to define different animations based on the animation name
+            switch (animationName.ToLower())
+            {
+                case "attack":
+                    targetCharacter.PlayAttackAnimation();
+                    break;
+
+                case "block":
+                    Debug.Log($"{targetCharacter.characterName} is playing the Block animation.");
+                    break;
+
+                default:
+                    Debug.LogError($"Animation {animationName} not recognized for {targetCharacter.characterName}.");
+                    break;
+            }
+        
+        }
+        else
+        {
+            Debug.LogError("Target character is null!");
+        }
     }
 
     // Function to check if there's enough mana for the selected card
@@ -565,7 +667,9 @@ public class GameController : MonoBehaviour
 
     private IEnumerator MoveDucksCoroutine(Vector3 targetPosition)
     {
-        float duration = 1.5f; // Adjust the time it takes to move
+        yield return new WaitForSeconds(0.3f);
+
+        float duration = 2f; // Adjust the time it takes to move
         float elapsedTime = 0f;
         Vector3 startingPosition = ducksParent.transform.position;
 
@@ -623,7 +727,7 @@ public class GameController : MonoBehaviour
         // Spawn a new enemy with scaled health and damage
         Vector3 enemySpawnPosition = enemySpawnPoint.position; 
         enemy = Instantiate(enemyPrefab, enemySpawnPosition, Quaternion.identity).GetComponent<Enemy>();
-        enemy.InitializeCharacter("New Enemy", scaledHealth, scaledDamage, CharacterType.Enemy);
+        enemy.InitializeCharacter("New Enemy", scaledHealth, scaledDamage, CharacterType.Enemy, enemySpawnPoint);
 
         allCharacters.Add(enemy); // Add Enemy to available targets
         Enemies.Add(enemy); // Add Enemy to available targets
@@ -634,6 +738,7 @@ public class GameController : MonoBehaviour
             duck.block = 0;
             duck.ResetEvadeChance();
             duck.UpdateStatText();
+            duck.SetPositionAtHome();
 
             if (duck.currentHealth <= 0)
             {

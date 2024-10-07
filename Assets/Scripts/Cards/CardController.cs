@@ -45,12 +45,12 @@ public class CardController : MonoBehaviour
     {
         deck.Add(new Card("Smoke Bomb",         CardType.Rogue,     TargetType.AllAllies,       1, 1, 0));
         deck.Add(new Card("Poison",             CardType.Rogue,     TargetType.Enemy,           2, 2, 3));
-        deck.Add(new Card("Heal",               CardType.Wizard,    TargetType.AllAllies,       1, 4, 0));
-        deck.Add(new Card("Fireball",           CardType.Wizard,    TargetType.Enemy,           1, 3, 0));
+        deck.Add(new Card("Heal",               CardType.Wizard,    TargetType.AllAllies,       2, 4, 0));
+        deck.Add(new Card("Fireball",           CardType.Wizard,    TargetType.Enemy,           2, 4, 0));
         deck.Add(new Card("Taunt",              CardType.Knight,    TargetType.Knight,          1, 1, 0));
-        deck.Add(new Card("Reckless",           CardType.Knight,    TargetType.Enemy,           1, 8, 4));
-        deck.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 1, 0));
-        deck.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 1, 0));
+        deck.Add(new Card("Reckless",           CardType.Knight,    TargetType.Enemy,           3, 8, 4));
+        deck.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 2, 0));
+        deck.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 3, 0));
         deck.Add(new Card("Neutral Block",      CardType.Neutral,   TargetType.AllAllies,       1, 5, 0));
         deck.Add(new Card("Neutral Block",      CardType.Neutral,   TargetType.AllAllies,       1, 5, 0));
     }
@@ -362,12 +362,12 @@ public class CardController : MonoBehaviour
         // Initialize the card library with all unique cards
         cardLibrary.Add(new Card("Smoke Bomb",         CardType.Rogue,     TargetType.AllAllies,       1, 1, 0));
         cardLibrary.Add(new Card("Poison",             CardType.Rogue,     TargetType.Enemy,           2, 2, 3));
-        cardLibrary.Add(new Card("Heal",               CardType.Wizard,    TargetType.AllAllies,       1, 4, 0));
-        cardLibrary.Add(new Card("Fireball",           CardType.Wizard,    TargetType.Enemy,           1, 3, 0));
+        cardLibrary.Add(new Card("Heal",               CardType.Wizard,    TargetType.AllAllies,       2, 4, 0));
+        cardLibrary.Add(new Card("Fireball",           CardType.Wizard,    TargetType.Enemy,           2, 4, 0));
         cardLibrary.Add(new Card("Taunt",              CardType.Knight,    TargetType.Knight,          1, 1, 0));
-        cardLibrary.Add(new Card("Reckless",           CardType.Knight,    TargetType.Enemy,           1, 8, 4));
-        cardLibrary.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 1, 0));
-        cardLibrary.Add(new Card("Neutral Block",      CardType.Neutral,   TargetType.AllAllies,       1, 5, 0));
+        cardLibrary.Add(new Card("Reckless",           CardType.Knight,    TargetType.Enemy,           3, 8, 4));
+        cardLibrary.Add(new Card("Neutral Attack",     CardType.Neutral,   TargetType.Enemy,           1, 2, 0));
+        cardLibrary.Add(new Card("Neutral Block",      CardType.Neutral,   TargetType.AllAllies,       1, 3, 0));
         // Add more unique cards as needed
     }
 
@@ -388,11 +388,18 @@ public class CardController : MonoBehaviour
             rewardCards.Add(randomCard);
         }
 
-        // Spawn the cards off-screen and then animate them into the target position
+        // Start the staggered animation for all reward cards
+        StartCoroutine(AnimateCardsOneByOne());
+    }
+
+    private IEnumerator AnimateCardsOneByOne()
+    {
+        float staggerDelay = 0.1f;  // Delay between each card animation
+
         for (int i = 0; i < rewardCards.Count; i++)
         {
             // Instantiate visual card (CardDisplay) at start position below the screen
-            Vector3 startPosition = endPositions[i].position - new Vector3(0, 38.4f, 0); // 38.4 units below the target position
+            Vector3 startPosition = endPositions[i].position - new Vector3(0, 25.6f, 0); // 38.4 units below the target position
             GameObject cardObj = Instantiate(cardPrefab, startPosition, Quaternion.identity);
 
             // Set card data (display the card)
@@ -401,19 +408,24 @@ public class CardController : MonoBehaviour
             rewardCardDisplays.Add(cardDisplay);
 
             // Animate the card moving into position
-            StartCoroutine(AnimateCardIntoPosition(cardDisplay, endPositions[i].position));
+            yield return StartCoroutine(AnimateCardIntoPosition(cardDisplay, endPositions[i].position));
+
+            // Wait for a small amount of time before moving the next card
+            yield return new WaitForSeconds(staggerDelay);
         }
 
-        Debug.Log("Reward cards generated and moving into position.");
+        GameController.instance.chooseNewCardText.SetActive(true);
+
+        Debug.Log("Reward cards generated and staggered into position.");
     }
 
     private IEnumerator AnimateCardIntoPosition(CardDisplay card, Vector3 endPosition)
     {
-        float moveSpeed = 50f; // Adjust the speed as necessary
+        float moveSpeed = 100f; // Adjust the speed as necessary
         Vector3 startPosition = card.transform.position;
 
         float elapsedTime = 0;
-        float totalTime = 0.5f; // Time for the animation to complete
+        float totalTime = 0.3f; // Time for the animation to complete
 
         while (elapsedTime < totalTime)
         {

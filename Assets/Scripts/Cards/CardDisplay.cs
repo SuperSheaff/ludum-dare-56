@@ -4,6 +4,7 @@ using TMPro;
 public class CardDisplay : MonoBehaviour
 {
     public TextMeshPro manaCostText;
+    public TextMeshPro descriptionText;  // Add a reference to the description text object
     public SpriteRenderer cardSpriteRenderer;
 
     public float moveSpeed = 5.0f;  // Speed at which the card moves
@@ -69,27 +70,35 @@ public class CardDisplay : MonoBehaviour
         {
             case "Smoke Bomb":
                 cardSpriteRenderer.sprite = smokebombCardSprite;
+                SetDescription($"All ducks gain <color=#00FF00>50%</color> evade chance for <color=#FFFF00>{cardData.primaryAmount}</color> turns.");
                 break;
             case "Poison":
                 cardSpriteRenderer.sprite = poisonCardSprite;
+                SetDescription($"Apply poison to target, dealing <color=#FF0000>{cardData.primaryAmount}</color> damage over <color=#FFFF00>{cardData.secondaryAmount}</color> turns.");
                 break;
             case "Heal":
                 cardSpriteRenderer.sprite = healCardSprite;
+                SetDescription($"Heal <color=#00FF00>{cardData.primaryAmount}</color> health to target duck.");
                 break;
             case "Fireball":
                 cardSpriteRenderer.sprite = fireballCardSprite;
+                SetDescription($"Deal <color=#FF4500>{cardData.primaryAmount}</color> damage to a target enemy.");
                 break;
             case "Taunt":
                 cardSpriteRenderer.sprite = tauntCardSprite;
+                SetDescription($"Taunt the enemy, forcing them to target the <color=#ADD8E6>Knight</color>.");
                 break;
             case "Reckless":
                 cardSpriteRenderer.sprite = recklessCardSprite;
+                SetDescription($"Deal <color=#FF0000>{cardData.primaryAmount}</color> damage to target and <color=#FFFF00>{cardData.secondaryAmount}</color> damage to knight duck.");
                 break;
             case "Neutral Attack":
                 cardSpriteRenderer.sprite = neutralAttackCardSprite;
+                SetDescription($"Deal <color=#FF0000>{cardData.primaryAmount}</color> damage to a target enemy.");
                 break;
             case "Neutral Block":
                 cardSpriteRenderer.sprite = neutralBlockCardSprite;
+                SetDescription($"Gain <color=#00FFFF>{cardData.primaryAmount}</color> block.");
                 break;
         }
     }
@@ -137,6 +146,7 @@ public class CardDisplay : MonoBehaviour
         if (IsReward)
         {
             CardController.instance.AddCardToDeck(this.cardData);
+            GameController.instance.chooseNewCardText.SetActive(false);
         }
         // When clicked, move the card to the play position and start target selection
         else if (isHovered && !isBeingPlayed  && hoverEnabled && !isDisabled)
@@ -146,6 +156,15 @@ public class CardDisplay : MonoBehaviour
 
             // Send this card to the CardController
             CardController.instance.OnCardSelected(this);
+        }
+    }
+
+    // Function to set the card's description based on primary and secondary amounts
+    private void SetDescription(string description)
+    {
+        if (descriptionText != null)
+        {
+            descriptionText.text = description;
         }
     }
 

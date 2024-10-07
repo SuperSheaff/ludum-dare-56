@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &6090608538452445465
 RectTransform:
   m_ObjectHideFlags: 0
@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -3.79}
-  m_SizeDelta: {x: 17.42, y: 1.6}
+  m_SizeDelta: {x: 8, y: 3.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &3955685893320635270
 MeshRenderer:
@@ -99,7 +99,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: Apply poison to target, dealing 3 damage over 3 turns.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
   m_sharedMaterial: {fileID: -154946935227663759, guid: a12a758a06ec26a4dbe3c0c10887e62a, type: 2}
@@ -138,7 +138,7 @@ MonoBehaviour:
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
-  m_lineSpacing: 0
+  m_lineSpacing: 50
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
@@ -444,6 +444,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   manaCostText: {fileID: 1608058606870354280}
+  descriptionText: {fileID: 5153455359381039664}
   cardSpriteRenderer: {fileID: 7450007436259037964}
   moveSpeed: 500
   hoverHeight: 6.4

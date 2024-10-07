@@ -1,5 +1,7 @@
 using UnityEngine;
 using TMPro; // Import the TextMeshPro namespace
+using System.Collections;
+using System.Collections.Generic;
 
 public enum CharacterType
 {
@@ -20,9 +22,13 @@ public class Character : MonoBehaviour
     public float evadeChance = 0f; // Evade chance (0.0 to 1.0)
     private int evadeChanceTurnsRemaining;
 
+    public float attackMoveDistance = 1.5f;  // How far the character moves forward during an attack
+    public float attackMoveSpeed = 5.0f;     // Speed of the attack movement
+
     // Particle systems for block and health effects
     public ParticleSystem blockParticle;
     public ParticleSystem healthParticle;
+    public ParticleSystem deathParticle;
 
     public TextMeshPro healthText; // Reference to the TextMeshPro component for displaying health
     public TextMeshPro blockText; // Reference to the TextMeshPro component for displaying health
@@ -40,6 +46,7 @@ public class Character : MonoBehaviour
 
     public bool markerIsActive;
 
+   public Transform homePosition;
 
     // Poison-related properties
     private int poisonDamage;
@@ -58,13 +65,14 @@ public class Character : MonoBehaviour
     }
 
     // Initialize character stats and health text
-    public virtual void InitializeCharacter(string name, int health, int attack, CharacterType type)
+    public virtual void InitializeCharacter(string name, int health, int attack, CharacterType type, Transform homeTransform)
     {
         characterName   = name;
         maxHealth       = health;
         currentHealth   = health;
         attackDamage    = attack;
         characterType   = type;
+        homePosition    = homeTransform;
 
         HideIntentMarker();
         UpdateStatText();
@@ -151,6 +159,8 @@ public class Character : MonoBehaviour
             healthParticle.Play();
         }
 
+        PlayDamageAnimation();
+
         // Update the health text
         UpdateStatText();
 
@@ -227,7 +237,7 @@ public class Character : MonoBehaviour
     }
 
     // Function to update the health and block text display
-    public void UpdateStatText()
+    public virtual void UpdateStatText()
     {
         if (currentHealth > 0)
         {
@@ -250,31 +260,6 @@ public class Character : MonoBehaviour
         {
             blockMarker.SetActive(false); // Hide the block marker when block is 0
         }
-    }
-
-    // Function when character dies
-    public void Die()
-    {
-        Debug.Log(characterName + " has died!");
-
-        // Hide health and block markers
-        if (healthMarker != null)
-        {
-            healthMarker.SetActive(false);
-        }
-        if (blockMarker != null)
-        {
-            blockMarker.SetActive(false);
-        }
-
-        // Show death sprite
-        if (deathSprite != null)
-        {
-            GetComponent<SpriteRenderer>().sprite = deathSprite;
-        }
-
-        // Notify the GameController to disable cards of this duck's class
-        GameController.instance.OnCharacterDeath(characterType);
     }
 
     // Function to show the marker above the character
@@ -351,4 +336,166 @@ public class Character : MonoBehaviour
             intentMarker.SetActive(false); // Hide the marker
         }
     }
+    // Attack Animation Coroutine using the homePosition
+    public void PlayAttackAnimation()
+    {
+        StartCoroutine(AttackAnimation());
+    }
+
+    public IEnumerator AttackAnimation()
+    {
+        Vector3 targetPosition;
+
+        if (IsAlly())  // Ducks (move right)
+        {
+            targetPosition = new Vector3(homePosition.position.x + attackMoveDistance, homePosition.position.y, homePosition.position.z);
+        }
+        else if (IsEnemy())  // Enemies (move left)
+        {
+            targetPosition = new Vector3(homePosition.position.x - attackMoveDistance, homePosition.position.y, homePosition.position.z);
+        }
+        else
+        {
+            yield break;
+        }
+
+        // Move the character forward
+        yield return StartCoroutine(MoveToPosition(targetPosition));
+
+        // Add a slight delay
+        yield return new WaitForSeconds(0.1f);
+
+        // Move the character back to the home position
+        yield return StartCoroutine(MoveToPosition(homePosition.position));
+    }
+
+    // Damage Animation Coroutine using the homePosition
+    public void PlayDamageAnimation()
+    {
+        StartCoroutine(DamageAnimation());
+    }
+
+    public IEnumerator DamageAnimation()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        Vector3 targetPosition;
+
+        if (IsAlly())  // Ducks (flinch left)
+        {
+            targetPosition = new Vector3(homePosition.position.x - attackMoveDistance, homePosition.position.y, homePosition.position.z);
+        }
+        else if (IsEnemy())  // Enemies (flinch right)
+        {
+            targetPosition = new Vector3(homePosition.position.x + attackMoveDistance, homePosition.position.y, homePosition.position.z);
+        }
+        else
+        {
+            yield break;
+        }
+
+        // Move the character backward (flinch)
+        yield return StartCoroutine(MoveToPosition(targetPosition));
+
+        // Add a slight delay
+        // yield return new WaitForSeconds(0.1f);
+
+        // Move the character back to the home position
+        yield return StartCoroutine(MoveToPosition(homePosition.position));
+    }
+
+    // Coroutine to move the character to a target position smoothly with a timeout
+    private IEnumerator MoveToPosition(Vector3 targetPosition)
+    {
+        float timeout = 0.3f;  // Set the timeout duration
+        float elapsedTime = 0f;  // Track the elapsed time
+
+        while (Vector3.Distance(transform.position, targetPosition) > 0.01f && elapsedTime < timeout)
+        {
+            // Move towards the target position
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, attackMoveSpeed * Time.deltaTime);
+
+            // Increment elapsed time
+            elapsedTime += Time.deltaTime;
+
+            // Wait for the next frame
+            yield return null;
+        }
+
+        // After timeout or reaching the position, set the final position
+        transform.position = targetPosition;
+    }
+
+    public void Die()
+    {
+        StartCoroutine(IE_Die());
+    }
+
+    // Function when character dies
+    private IEnumerator IE_Die()
+    {
+        Debug.Log(characterName + " has died!");
+
+        // Step 1: Shake the character
+        yield return StartCoroutine(ShakeCharacter(0.6f));  // Shake for 0.6 seconds
+
+        yield return new WaitForSeconds(0.05f);
+
+        // Step 2: Play death particle effect (if assigned)
+        if (deathParticle != null)
+        {
+            deathParticle.Play();  // You can use healthParticle as the death particle effect
+        }
+
+        // Wait a moment after the death particles (optional)
+        yield return new WaitForSeconds(0.1f);
+
+
+        // Hide health and block markers
+        if (healthMarker != null)
+        {
+            healthMarker.SetActive(false);
+        }
+        if (blockMarker != null)
+        {
+            blockMarker.SetActive(false);
+        }
+
+        // Show death sprite
+        if (deathSprite != null)
+        {
+            GetComponent<SpriteRenderer>().sprite = deathSprite;
+        }
+
+        yield return new WaitForSeconds(0.3f);
+
+        // Notify the GameController to disable cards of this duck's class
+        GameController.instance.OnCharacterDeath(characterType);
+    }
+
+    // Coroutine to shake the character for a specified duration
+    private IEnumerator ShakeCharacter(float duration)
+    {
+        Vector3 originalPosition = homePosition.position;  // Store the original position
+        float elapsed = 0f;
+
+        // Continue shaking for the specified duration
+        while (elapsed < duration)
+        {
+            float xOffset = Random.Range(-0.1f, 0.1f);  // Random horizontal movement
+            float yOffset = Random.Range(-0.1f, 0.1f);  // Random vertical movement
+
+            // Apply the random offset to the character's position
+            transform.position = new Vector3(originalPosition.x + xOffset, originalPosition.y + yOffset, originalPosition.z);
+
+            // Wait for the next frame
+            yield return null;
+
+            elapsed += Time.deltaTime;
+        }
+
+        // Reset the position back to the original at the end
+        transform.position = homePosition.position;
+    }
+
 }

@@ -22,9 +22,18 @@ public class Enemy : Character
     }
 
     // Initialize the enemy's stats (overrides the base InitializeCharacter method)
-    public override void InitializeCharacter(string name, int health, int attack, CharacterType type)
+    public override void InitializeCharacter(string name, int health, int attack, CharacterType type, Transform homeTransform)
     {
-        base.InitializeCharacter(name, health, attack, type);
+        base.InitializeCharacter(name, health, attack, type, homeTransform);
+
+        // Update the damage display and marker
+        UpdateDamageDisplay();
+    }
+
+        // Initialize the enemy's stats (overrides the base InitializeCharacter method)
+    public override void UpdateStatText()
+    {
+        base.UpdateStatText();
 
         // Update the damage display and marker
         UpdateDamageDisplay();
@@ -33,15 +42,23 @@ public class Enemy : Character
     // Function to update the damage display on spawn
     private void UpdateDamageDisplay()
     {
-        if (damageText != null)
+        // If block is greater than 0, display the block text and marker
+        if (currentHealth > 0)
         {
-            damageText.text = attackDamage.ToString(); // Set the text to the current attack damage
-        }
+            if (damageText != null)
+            {
+                damageText.text = attackDamage.ToString(); // Set the text to the current attack damage
+            }
 
-        // Enable the damage marker if damage is greater than 0
-        if (damageMarker != null)
+            // Enable the damage marker if damage is greater than 0
+            if (damageMarker != null)
+            {
+                damageMarker.SetActive(attackDamage > 0);
+            }
+        }
+        else
         {
-            damageMarker.SetActive(attackDamage > 0);
+            damageMarker.SetActive(false); // Hide the block marker when block is 0
         }
     }
 
