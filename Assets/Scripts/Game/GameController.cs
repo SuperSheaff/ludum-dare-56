@@ -374,11 +374,17 @@ public class GameController : MonoBehaviour
                         character.ApplyEvadeChance(0.5f, 1); // 50% evade chance for 1 turn
                     }
                 }
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
                 PlayCharacterAnimation(CharacterType.Rogue, "attack");
                 break;
 
             // Apply poison for primaryAmount damage over secondaryAmount turns
             case "Poison":
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
                 PlayCharacterAnimation(CharacterType.Rogue, "attack");
                 target.ApplyPoison(playedCard.primaryAmount, playedCard.secondaryAmount); 
 
@@ -386,18 +392,29 @@ public class GameController : MonoBehaviour
 
             // Apply heal for primaryAmount to target
             case "Heal":
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
                 PlayCharacterAnimation(CharacterType.Wizard, "attack");
                 target.Heal(playedCard.primaryAmount);
                 break;
 
             // Apply damage for primaryAmount to target
             case "Fireball":
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
                 PlayCharacterAnimation(CharacterType.Wizard, "attack");
                 target.TakeDamage(playedCard.primaryAmount);
                 break;
 
             // Set the enemy's intent to the Knight Duck
             case "Taunt":
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
                 PlayCharacterAnimation(CharacterType.Knight, "attack");
                 foreach (Character character in allCharacters)
                 {
@@ -415,6 +432,9 @@ public class GameController : MonoBehaviour
 
             // Deal primary damage to the target and Knight Duck takes secondary damage
             case "Reckless":
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
                 PlayCharacterAnimation(CharacterType.Knight, "attack");
                 yield return new WaitForSeconds(0.3f);
                 target.TakeDamage(playedCard.primaryAmount);
@@ -447,6 +467,9 @@ public class GameController : MonoBehaviour
 
             // Apply damage for primaryAmount to target
             case "Neutral Attack":
+                yield return new WaitForSeconds(0.3f);
+                SoundManager.instance.PlaySound("Quack1", this.transform, true);
+                yield return new WaitForSeconds(0.3f);
                 PlayCharacterAnimation(CharacterType.Knight, "attack");
                 target.TakeDamage(playedCard.primaryAmount);
                 break;

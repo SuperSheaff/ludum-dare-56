@@ -18,6 +18,7 @@ public class EndTurnButton : MonoBehaviour
     {
         // Change the color of the button when the mouse hovers over it
         spriteRenderer.color = hoverColor;
+        SoundManager.instance.PlaySound("ButtonHover", this.transform, true);
 
         // Check if the mouse is clicked while hovering
         if (Input.GetMouseButtonDown(0)) // Left mouse button
@@ -46,6 +47,7 @@ public class EndTurnButton : MonoBehaviour
     {
         Debug.Log("Button clicked!");
         // Here, you can call any method or action you want, such as ending the player's turn:
+        SoundManager.instance.PlaySound("ButtonSelect", this.transform, true);
         GameController.instance.EndPlayerTurn();
     }
 }

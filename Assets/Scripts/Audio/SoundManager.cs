@@ -45,7 +45,7 @@ public class SoundManager : MonoBehaviour
     }
 
     // Play a sound by name
-    public void PlaySound(string name, Transform spawnTransform = null)
+    public void PlaySound(string name, Transform spawnTransform = null, bool allowMultiple = false)
     {
         GameSound gs = System.Array.Find(gameSounds, sound => sound.name == name);
         if (gs == null)
@@ -56,31 +56,38 @@ public class SoundManager : MonoBehaviour
 
         Debug.Log("Playing Sound: " + name);
 
-        // Stop any existing instance of the sound before playing it again
-        if (gs.source != null && gs.source.isPlaying)
+        // If allowMultiple is false, stop any existing instance of the sound before playing it again
+        if (!allowMultiple && gs.source != null && gs.source.isPlaying)
         {
             gs.source.Stop();
         }
 
         if (spawnTransform != null)
         {
+            // Create a new AudioSource instance for spatial/3D sound
             AudioSource audioSource = Instantiate(soundFXObject, spawnTransform.position, Quaternion.identity);
             audioSource.clip = gs.clip;
             audioSource.volume = gs.volume;
             audioSource.pitch = gs.pitch;
             audioSource.loop = gs.loop;
-            audioSource.spatialBlend = gs.spatialBlend;
+            audioSource.spatialBlend = gs.spatialBlend; // 3D sound settings
             audioSource.Play();
 
+            // Destroy the AudioSource GameObject after the sound finishes, if not looping
             if (!gs.loop)
             {
                 Destroy(audioSource.gameObject, gs.clip.length);
             }
 
+            if (!activeSounds.ContainsKey(name))
+            {
+                activeSounds[name] = new List<AudioSource>();
+            }
             activeSounds[name].Add(audioSource); // Track this instance
         }
         else
         {
+            // Play non-spatial/2D sound (if gs.source is assigned)
             if (gs.source != null)
             {
                 gs.source.Play();

@@ -11,7 +11,7 @@ public class CardDisplay : MonoBehaviour
     public float hoverHeight = 1.0f; // How much the card should move up when hovered
     public float hoverZOffset = -1.0f; // How much the card should come forward on Z when hovered
 
-    private bool isDisabled = false; // To track if the card is disabled
+    public bool isDisabled = false; // To track if the card is disabled
     public GameObject disabledIcon; // Reference to an icon that appears when the card is disabled
 
     public bool IsReward = false;  // This will identify if the card is a reward card
@@ -129,6 +129,7 @@ public class CardDisplay : MonoBehaviour
         {
             isHovered = true;
             hoverOffset = new Vector3(0, hoverHeight, hoverZOffset);  // Apply hover offset (Y and Z)
+            SoundManager.instance.PlaySound("CardHover", this.transform);
         }
     }
 

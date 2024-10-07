@@ -34,6 +34,8 @@ public class CustomClickable : MonoBehaviour
         if (!isInteractable || hoverSprite == null || spriteRenderer == null) return;
 
         // Change the sprite to the hover sprite on hover
+        SoundManager.instance.PlaySound("ButtonHover", this.transform, true);
+        
         spriteRenderer.sprite = hoverSprite;
     }
 
@@ -56,6 +58,7 @@ public class CustomClickable : MonoBehaviour
         // Invoke any custom onClick methods
         if (onClick != null)
         {
+            SoundManager.instance.PlaySound("ButtonSelect", this.transform, true);
             onClick.Invoke();
         }
     }

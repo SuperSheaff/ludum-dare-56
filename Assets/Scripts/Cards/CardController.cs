@@ -91,6 +91,7 @@ public class CardController : MonoBehaviour
 
         for (int i = 0; i < cardsToDraw; i++)
         {
+
             // Get logical card data
             Card cardToDraw = drawPile[0];
             drawPile.RemoveAt(0);
@@ -168,6 +169,7 @@ public class CardController : MonoBehaviour
 
         // Notify the GameController to show the selected card UI
         GameController.instance.UpdateUICardSelected(cardDisplay);
+        SoundManager.instance.PlaySound("CardSelect", this.transform, true);
 
         // Disable hover for all cards in the hand and make them slightly transparent
         DisableHoverOnAllCards();
@@ -221,6 +223,8 @@ public class CardController : MonoBehaviour
             // Set target position including Z
             hand[i].SetTargetPosition(new Vector3(cardXPos, cardSpawningPoint.position.y, zPos));
 
+            SoundManager.instance.PlaySound("CardDraw", this.transform, true);
+
             // Add a delay for sequential movement
             yield return new WaitForSeconds(0.25f);
         }
@@ -246,8 +250,11 @@ public class CardController : MonoBehaviour
     {
         foreach (CardDisplay card in hand)
         {
-            card.DisableHover(); // Disable hover on each card
-            card.cardSpriteRenderer.color = Color.gray;
+            if (!card.isDisabled)
+            {
+                card.DisableHover(); // Disable hover on each card
+                card.cardSpriteRenderer.color = Color.gray;
+            }
         }
     }
 
@@ -255,8 +262,11 @@ public class CardController : MonoBehaviour
     {
         foreach (CardDisplay card in hand)
         {
-            card.EnableHover(); // Enable hover on each card
-            card.cardSpriteRenderer.color = Color.white;
+            if (!card.isDisabled)
+            {
+                card.EnableHover(); // Enable hover on each card
+                card.cardSpriteRenderer.color = Color.white;
+            }
         }
     }
 
@@ -423,6 +433,7 @@ public class CardController : MonoBehaviour
     {
         float moveSpeed = 100f; // Adjust the speed as necessary
         Vector3 startPosition = card.transform.position;
+        SoundManager.instance.PlaySound("CardDraw", this.transform, true);
 
         float elapsedTime = 0;
         float totalTime = 0.3f; // Time for the animation to complete
